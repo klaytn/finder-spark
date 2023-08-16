@@ -1,0 +1,15 @@
+include classpath("prod/all.cypress.conf")
+
+spark.driver.cores=1
+spark.driver.memory=6g
+spark.executor.instances=1
+spark.executor.cores=3
+spark.executor.memory=6g
+
+spark.app.es_recovery.start_id=0
+# spark.app.es_recovery.end_id=
+spark.app.es_recovery.min_block_number=0
+spark.app.es_recovery.repartition=4
+spark.app.es_recovery.index_bulk_size=150
+spark.app.es_recovery.db_names=["finder0101r"]
+spark.app.es_recovery.table_name="transactions"

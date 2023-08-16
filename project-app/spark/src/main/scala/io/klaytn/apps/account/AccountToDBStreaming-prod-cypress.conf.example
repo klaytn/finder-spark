@@ -1,0 +1,31 @@
+include classpath("prod/all.cypress.conf")
+
+spark.driver.cores=1
+spark.driver.memory=2g
+spark.executor.instances=3
+spark.executor.cores=1
+spark.executor.memory=5g
+spark.streaming.kafka.maxRatePerPartition=50
+spark.streaming.backpressure.enabled=true
+
+spark.app {
+    batchDuration = "1 seconds"
+
+    streaming {
+        monitoring.maxDelay = "5 seconds"
+        monitoring.notifyInterval = "5 seconds"
+    }
+
+    start.block.number = 0
+
+    kafka {
+        consume.mode = "resume"
+        topic.use_list = ["block"]
+    }
+
+    mysql {
+        minimumIdle = 3
+        maximumPoolSize = 32
+        connectionTimeout = 1000000
+    }
+}

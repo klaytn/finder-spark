@@ -1,0 +1,17 @@
+.bsp
+*.class
+*.log
+.idea
+target
+download
+.bsp
+.java-version
+data-lake
+.bloop
+.metals
+metals.sbt
+*.conf
+!*example.conf
+
+dev.env.sh
+prod.env.sh

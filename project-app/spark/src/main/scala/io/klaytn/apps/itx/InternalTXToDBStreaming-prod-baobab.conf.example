@@ -1,0 +1,25 @@
+include classpath("prod/all.baobab.conf")
+
+spark.driver.cores=1
+spark.driver.memory=2g
+spark.executor.instances=1
+spark.executor.cores=1
+spark.executor.memory=2g
+spark.streaming.kafka.maxRatePerPartition=50
+spark.streaming.backpressure.enabled=true
+
+spark.app {
+    batchDuration = "500 ms"
+
+    streaming {
+        monitoring.maxDelay = "5 seconds"
+        monitoring.notifyInterval = "5 seconds"
+    }
+
+    start.block.number = 0
+
+    kafka {
+        consume.mode = "resume"
+        topic.use_list = ["internalTransaction"]
+    }
+}

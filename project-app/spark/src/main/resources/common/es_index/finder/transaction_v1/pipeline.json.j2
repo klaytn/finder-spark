@@ -1,0 +1,15 @@
+{
+  "description" : "finder-transaction monthly index",
+  "processors" : [
+    {
+      "date_index_name" : {
+        "field" : "timestamp",
+        "index_name_prefix" : "{{ index_name }}-",
+        "index_name_format" : "yyyyMM",
+        "date_formats" : [ "UNIX" ],
+        "date_rounding" : "M",
+        "timezone" : "UTC"
+      }
+    }
+  ]
+}

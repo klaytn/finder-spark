@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<configuration>
+    <property
+    name="LOG_PATTERN"
+    value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %X{span_id:--} %X{userId:--} %-5level %logger{36}:\\(%line\\) %M - %msg%n"
+  />
+
+<!--    <springProfile name="dev">-->
+<!--        <property name="PHASE" value="dev" />-->
+<!--        <property name="ES_ENDPOINT" value="http://elasticsearch-logging.kubeprod.svc.cluster.local:9200" />-->
+<!--    </springProfile>-->
+<!--    <springprofile name="stage">-->
+<!--        <property name="phase" value="stage" />-->
+<!--        <property name="es_endpoint" value="https://es.dev.klayoff.com" />-->
+<!--    </springprofile>-->
+<!--    <springProfile name="prod">-->
+<!--        <property name="PHASE" value="prod" />-->
+<!--        <property name="ES_ENDPOINT" value="https://es.dev.klayoff.com" />-->
+<!--    </springProfile>-->
+
+    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
+        <resetJUL>true</resetJUL>
+    </contextListener>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+<!--    <appender name="elasticSearchAppender" class="io.klaytn.commons.es.logback.ElasticSearchAppender">-->
+<!--        <url>${ES_ENDPOINT}</url>-->
+<!--        <indexPrefix>server-log</indexPrefix>-->
+<!--        <serviceName>exchange-rate-collector</serviceName>-->
+<!--        <phase>${PHASE}</phase>-->
+<!--    </appender>-->
+
+    <logger name="io.klaytn" additivity="false" level="DEBUG">
+        <appender-ref ref="CONSOLE" />
+    </logger>
+
+    <logger name="org" level="ERROR" />
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+    </root>
+</configuration>

@@ -1,0 +1,21 @@
+#!/bin/sh
+
+SCRIPT_PATH=${BASH_SOURCE[0]}
+PROJECT_ROOT=$(cd $(dirname $(readlink ${SCRIPT_PATH} || echo ${SCRIPT_PATH}))/../;/bin/pwd)
+SCRIPT_ROOT=$PROJECT_ROOT/bin
+
+PRIVATE2_SUBNET01=""
+PRIVATE2_SUBNET02=""
+PRIVATE2_SUBNET03=""
+
+export PHASE=dev
+export MASTER_INSTANCE_TYPE="m6g.2xlarge"
+export CORE_INSTANCE_TYPE="m6g.2xlarge"
+export SUBNET_ID=$PRIVATE2_SUBNET01
+export SERVICE_ACCESS_SECURITY_GROUP=""
+export EMR_MANAGED_SLAVE_SECURITY_GROUP=""
+export EMR_MANAGED_MASTER_SECURITY_GROUP=""
+export EMR_INSTANCE_PROFILE=""
+export S3_LOG_URI="s3n://klaytn-prod-spark/emr"
+
+$SCRIPT_ROOT/create_cluster.sh $@

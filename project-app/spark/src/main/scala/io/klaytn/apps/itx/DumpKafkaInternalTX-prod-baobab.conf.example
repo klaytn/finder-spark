@@ -1,0 +1,32 @@
+include classpath("prod/all.baobab.conf")
+
+spark.driver.cores=1
+spark.driver.memory=2g
+spark.executor.instances=1
+spark.executor.cores=1
+spark.executor.memory=3g
+spark.streaming.kafka.maxRatePerPartition=50
+spark.streaming.backpressure.enabled=true
+
+spark.app {
+    batchDuration = "1800 seconds"
+
+    streaming {
+        monitoring.maxDelay = "2000 seconds"
+        monitoring.notifyInterval = "60 seconds"
+    }
+
+    kafka {
+        consume.mode = "resume"
+        topic.use_list = ["internalTransaction"]
+    }
+
+    start.block.number = 0
+
+    dump.kafka {
+        num.executors = 2
+    }
+
+    log.storage.s3.path = "ENV_S3_LAKE_BUCKET_NAME"
+    refined.log.count = 1
+}

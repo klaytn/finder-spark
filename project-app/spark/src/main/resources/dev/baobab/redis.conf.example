@@ -1,0 +1,11 @@
+spark.app.redis {
+    spark {
+        url = "ENV_REDIS_HOST:6379"
+        timeout = 3000
+    }
+
+    finder {
+        url = "ENV_REDIS_HOST:6379"
+        timeout = 3000
+    }
+}

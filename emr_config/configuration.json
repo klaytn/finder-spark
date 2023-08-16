@@ -1,0 +1,66 @@
+[
+  {
+    "Classification": "spark",
+    "Properties": {
+      "maximizeResourceAllocation": "true"
+    }
+  },
+  {
+    "Classification": "spark-hive-site",
+    "Properties": {
+      "hive.metastore.client.factory.class": "com.amazonaws.glue.catalog.metastore.AWSGlueDataCatalogHiveClientFactory"
+    }
+  },
+  {
+    "Classification": "spark-env",
+    "Configurations": [
+      {
+        "Classification": "export",
+        "Properties": {
+          "JAVA_HOME": "/usr/lib/jvm/java-11-amazon-corretto.aarch64"
+        }
+      }
+    ]
+  },
+  {
+    "Classification": "spark-defaults",
+    "Properties": {
+      "spark.executorEnv.JAVA_HOME": "/usr/lib/jvm/java-11-amazon-corretto.aarch64",
+      "spark.dynamicAllocation.enabled": "false",
+      "spark.executor.defaultJavaOptions": "-XX:+UseG1GC -verbose:gc -XX:OnOutOfMemoryError='kill -9 %p' -Dio.netty.tryReflectionSetAccessible=true",
+      "spark.executor.extraJavaOptions": "-XX:+UseG1GC -verbose:gc -XX:OnOutOfMemoryError='kill -9 %p' -Dio.netty.tryReflectionSetAccessible=true",
+      "spark.driver.defaultJavaOptions": "-XX:+UseG1GC -verbose:gc -XX:OnOutOfMemoryError='kill -9 %p' -Dio.netty.tryReflectionSetAccessible=true",
+      "spark.driver.extraJavaOptions": "-XX:+UseG1GC -verbose:gc -XX:OnOutOfMemoryError='kill -9 %p' -Dio.netty.tryReflectionSetAccessible=true",
+      "spark.rdd.compress": "true",
+      "spark.history.fs.cleaner.enabled": "true",
+      "spark.history.fs.cleaner.maxAge": "48h",
+      "spark.history.fs.cleaner.interval": "1h"
+    }
+  },
+  {
+    "Classification": "hadoop-env",
+    "Configurations": [
+      {
+        "Classification": "export",
+        "Properties": {
+          "JAVA_HOME": "/usr/lib/jvm/java-11-amazon-corretto.aarch64"
+        }
+      }
+    ]
+  },
+  {
+
+    "Classification": "yarn-site",
+    "Properties": {
+      "yarn.log-aggregation.retain-seconds": "86400"
+    }
+  },
+  {
+    "Classification": "spark-log4j",
+    "Properties": {
+      "log4j.rootCategory": "WARN,console",
+      "log4j.logger.org.apache.spark.streaming": "WARN,DRFA-stderr,DRFA-stdout"
+    }
+  }
+]
+

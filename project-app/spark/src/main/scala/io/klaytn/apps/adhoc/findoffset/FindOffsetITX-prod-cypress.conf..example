@@ -1,0 +1,12 @@
+include classpath("prod/all.cypress.conf")
+
+spark.app {
+    batchDuration = "5 seconds"
+
+    streaming {
+        monitoring.maxDelay = "10 seconds"
+        monitoring.notifyInterval = "10 seconds"
+    }
+
+    kafka.topic.use_list = ["internalTransaction"]
+}

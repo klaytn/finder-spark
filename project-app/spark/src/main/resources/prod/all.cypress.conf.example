@@ -1,0 +1,9 @@
+include classpath("prod/cypress/db.conf")
+include classpath("prod/cypress/redis.conf")
+include classpath("prod/cypress/kafka.conf")
+include classpath("prod/cypress/caver.conf")
+include classpath("prod/cypress/es.conf")
+
+spark.app.phase=prod
+spark.app.chain=cypress
+spark.app.base.bucket = "ENV_S3_BUCKET_NAME"

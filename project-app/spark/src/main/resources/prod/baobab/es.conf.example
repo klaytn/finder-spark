@@ -1,0 +1,24 @@
+spark.app.es {
+    transaction_v1 {
+        url = "ENV_OPENSEARCH_DOMAIN_ENDPOINT"
+        index_name = "baobab_transaction_v1"
+        number_of_shard = 9
+        number_of_replica = 1
+        template_file_path = "common/es_index/finder/transaction_v1/template.json.j2"
+        pipeline_file_path = "common/es_index/finder/transaction_v1/pipeline.json.j2"
+    }
+    account_v1 {
+        url = "ENV_OPENSEARCH_DOMAIN_ENDPOINT"
+        index_name = "baobab_account_v1"
+        number_of_shard = 3
+        number_of_replica = 1
+        template_file_path = "common/es_index/finder/account_v1/template.json.j2"
+    }
+    contract_v1 {
+        url = "ENV_OPENSEARCH_DOMAIN_ENDPOINT"
+        index_name = "baobab_contract_v1"
+        number_of_shard = 3
+        number_of_replica = 1
+        template_file_path = "common/es_index/finder/contract_v1/template.json.j2"
+    }
+}

@@ -1,0 +1,7 @@
+include classpath("dev/baobab/db.conf")
+include classpath("dev/baobab/redis.conf")
+include classpath("dev/baobab/kafka.conf")
+include classpath("dev/baobab/caver.conf")
+
+spark.app.base.bucket = "ENV_S3_BUCKET_NAME"
+spark.app.slack.url=ENV_SLACK_WEBHOOK_URL

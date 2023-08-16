@@ -1,0 +1,33 @@
+{
+  "index_patterns": ["{{ index_name }}-*"],
+  "version": 1,
+  "order": 1,
+  "settings": {
+    "index": {
+      "number_of_shards": {{ number_of_shards }},
+      "number_of_replicas": {{ number_of_replicas }},
+      "refresh_interval" : "1s"
+    }
+  },
+  "mappings": {
+    "_routing": {
+      "required": false
+    },
+    "dynamic": false,
+    "properties": {
+      "chain_id":                 { "type": "keyword" },
+      "transaction_hash":         { "type": "keyword" },
+      "transaction_index":        { "type": "integer" },
+      "block_number":             { "type": "long" },
+      "block_hash":               { "type": "keyword" },
+      "contract_address":         { "type": "keyword" },
+      "fee_payer":                { "type": "keyword" },
+      "from":                     { "type": "keyword" },
+      "to":                       { "type": "keyword" },
+      "sender_tx_hash":           { "type": "keyword" },
+      "status":                   { "type": "boolean" },
+      "type_int":                 { "type": "integer" },
+      "timestamp":                { "type": "long" }
+    }
+  }
+}

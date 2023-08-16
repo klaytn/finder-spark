@@ -1,0 +1,9 @@
+include classpath("prod/baobab/db.conf")
+include classpath("prod/baobab/redis.conf")
+include classpath("prod/baobab/kafka.conf")
+include classpath("prod/baobab/caver.conf")
+include classpath("prod/baobab/es.conf")
+
+spark.app.phase=prod
+spark.app.chain=baobab
+spark.app.base.bucket = "ENV_S3_BUCKET_NAME"

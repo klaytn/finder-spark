@@ -1,0 +1,46 @@
+{
+  "index_patterns": ["{{ index_name }}"],
+  "version": 1,
+  "order": 1,
+  "settings": {
+    "index": {
+      "number_of_shards": {{ number_of_shards }},
+      "number_of_replicas": {{ number_of_replicas }},
+      "max_ngram_diff": 8,
+      "refresh_interval" : "1s"
+    },
+    "analysis": {
+      "analyzer": {
+        "ngram_lowercase_analyzer": {
+          "tokenizer": "ngram_tokenizer",
+          "filter": ["lowercase"]
+        }
+      },
+      "tokenizer": {
+        "ngram_tokenizer": {
+          "type": "ngram",
+          "min_gram": 2,
+          "max_gram": 10
+        }
+      }
+    }
+  },
+  "mappings": {
+    "_routing": {
+      "required": false
+    },
+    "dynamic": false,
+    "properties": {
+      "address":                             { "type": "keyword" },
+      "type":                                { "type": "integer" },
+      "balance":                             { "type": "double" },
+      "contract_type":                       { "type": "integer" },
+      "contract_creator_address":            { "type": "keyword" },
+      "contract_creator_tx_hash":            { "type": "keyword" },
+      "kns_domain":                          { "type": "text", "analyzer": "ngram_lowercase_analyzer" },
+      "address_label":                       { "type": "text", "analyzer": "ngram_lowercase_analyzer" },
+      "tags":                                { "type": "keyword", "fields": { "keyword": { "type": "keyword" } } },
+      "updated_at":                          { "type": "date", "format": "epoch_millis" }
+    }
+  }
+}
