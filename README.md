@@ -2,7 +2,7 @@
 
 This repository contains the Spark application code for the Klaytn blockchain data processing.
 
-For the overall architecture of the finder, please refer to the [Main Repo](https://github.com/klaytn/finder-infra/blob/main/README.md).
+For the overall architecture of the finder, please refer to the [Main Repo](https://github.com/klaytn/finder/blob/main/README.md).
 
 ---
 
