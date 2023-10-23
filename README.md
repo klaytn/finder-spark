@@ -69,7 +69,7 @@ If you want to run a specific test, you can run it with the following command.
 
 Example
 
-- > `./release.sh EMR_CLUSTER_ID io.klaytn.apps.block.BlockToDBStreaming cypress --build`
+- > `./release.sh j-5U3NWQOKI59S io.klaytn.apps.block.BlockToDBStreaming cypress --build`
 
 ### Notes
 
@@ -102,79 +102,79 @@ You can find the file in the following path.
 
 ## Deploy Batch Examples
 
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.refining.RestoreKafkaLogBatch cypress --build
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.refining.RestoreKafkaLogBatch baobab --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.refining.RestoreKafkaLogBatch cypress --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.refining.RestoreKafkaLogBatch baobab --build
 
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.restore.bulkload.BlockMakeData cypress --build
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.restore.bulkload.BlockMakeData baobab --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.restore.bulkload.BlockMakeData cypress --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.restore.bulkload.BlockMakeData baobab --build
 
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.restore.bulkload.InternalTXMakeData cypress --build
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.restore.bulkload.InternalTXMakeData baobab --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.restore.bulkload.InternalTXMakeData cypress --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.restore.bulkload.InternalTXMakeData baobab --build
 
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.restore.bulkload.AccountMakeData cypress --build
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.restore.bulkload.AccountMakeData baobab --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.restore.bulkload.AccountMakeData cypress --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.restore.bulkload.AccountMakeData baobab --build
 
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.restore.bulkload.BlockLoadData cypress --build
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.restore.bulkload.BlockLoadData baobab --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.restore.bulkload.BlockLoadData cypress --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.restore.bulkload.BlockLoadData baobab --build
 
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.restore.bulkload.InternalTXLoadData cypress --build
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.restore.bulkload.InternalTXLoadData baobab --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.restore.bulkload.InternalTXLoadData cypress --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.restore.bulkload.InternalTXLoadData baobab --build
 
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.restore.bulkload.AccountLoadData cypress --build
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.restore.bulkload.AccountLoadData baobab --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.restore.bulkload.AccountLoadData cypress --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.restore.bulkload.AccountLoadData baobab --build
 
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.restore.approveBurn.ApproveBurnBatch cypress --build
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.restore.approveBurn.ApproveBurnBatch baobab --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.restore.approveBurn.ApproveBurnBatch cypress --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.restore.approveBurn.ApproveBurnBatch baobab --build
 
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.restore.transfer.TransferBatch cypress --build
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.restore.transfer.TransferBatch baobab --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.restore.transfer.TransferBatch cypress --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.restore.transfer.TransferBatch baobab --build
 
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.adhoc.block.LoadBlockRewardBatch cypress --build
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.adhoc.block.LoadBlockRewardBatch baobab --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.adhoc.block.LoadBlockRewardBatch cypress --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.adhoc.block.LoadBlockRewardBatch baobab --build
 
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.restore.holder.HolderBatch cypress --build
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.restore.holder.HolderBatch baobab --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.restore.holder.HolderBatch cypress --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.restore.holder.HolderBatch baobab --build
 
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.restore.holder.MinusHolderBatch cypress --build
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.restore.holder.MinusHolderBatch baobab --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.restore.holder.MinusHolderBatch cypress --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.restore.holder.MinusHolderBatch baobab --build
 
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.restore.count.CounterBatch cypress --build
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.restore.count.CounterBatch baobab --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.restore.count.CounterBatch cypress --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.restore.count.CounterBatch baobab --build
 
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.restore.es.TransactionESRecoveryBatch cypress --build
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.restore.es.TransactionESRecoveryBatch baobab --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.restore.es.TransactionESRecoveryBatch cypress --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.restore.es.TransactionESRecoveryBatch baobab --build
 
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.restore.es.AccountESRecoveryBatch cypress --build
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.restore.es.AccountESRecoveryBatch baobab --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.restore.es.AccountESRecoveryBatch cypress --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.restore.es.AccountESRecoveryBatch baobab --build
 
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.restore.es.ContractESRecoveryBatch cypress --build
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.restore.es.ContractESRecoveryBatch baobab --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.restore.es.ContractESRecoveryBatch cypress --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.restore.es.ContractESRecoveryBatch baobab --build
 
 ## Deploy Streaming Examples
 
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.block.BlockToDBStreaming cypress --build
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.block.BlockToDBStreaming baobab --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.block.BlockToDBStreaming cypress --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.block.BlockToDBStreaming baobab --build
 
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.itx.InternalTXToDBStreaming cypress --build
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.itx.InternalTXToDBStreaming baobab --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.itx.InternalTXToDBStreaming cypress --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.itx.InternalTXToDBStreaming baobab --build
 
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.account.AccountToDBStreaming cypress --build
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.account.AccountToDBStreaming baobab --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.account.AccountToDBStreaming cypress --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.account.AccountToDBStreaming baobab --build
 
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.transfer.TransferToDBStreaming cypress --build
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.transfer.TransferToDBStreaming baobab --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.transfer.TransferToDBStreaming cypress --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.transfer.TransferToDBStreaming baobab --build
 
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.worker.FastWorkerStreaming cypress --build
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.worker.FastWorkerStreaming baobab --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.worker.FastWorkerStreaming cypress --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.worker.FastWorkerStreaming baobab --build
 
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.worker.SlowWorkerStreaming cypress --build
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.worker.SlowWorkerStreaming baobab --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.worker.SlowWorkerStreaming cypress --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.worker.SlowWorkerStreaming baobab --build
 
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.block.BlockToESStreaming cypress --build
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.block.BlockToESStreaming baobab --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.block.BlockToESStreaming cypress --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.block.BlockToESStreaming baobab --build
 
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.block.DumpKafkaBlock cypress --build
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.block.DumpKafkaBlock baobab --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.block.DumpKafkaBlock cypress --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.block.DumpKafkaBlock baobab --build
 
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.itx.DumpKafkaInternalTX cypress --build
-./release.sh EMR_CLUSTER_ID io.klaytn.apps.itx.DumpKafkaInternalTX baobab --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.itx.DumpKafkaInternalTX cypress --build
+./release.sh j-5U3NWQOKI59S io.klaytn.apps.itx.DumpKafkaInternalTX baobab --build

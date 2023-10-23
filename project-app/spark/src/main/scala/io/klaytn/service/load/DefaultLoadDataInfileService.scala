@@ -8,7 +8,7 @@ import io.klaytn.repository.{
   TransactionRepository
 }
 import io.klaytn.service.LoadDataInfileService
-import io.klaytn.utils.s3.S3Util
+import io.klaytn.utils.gcs.GCSUtil
 import io.klaytn.utils.spark.UserConfig
 import io.klaytn.utils.{JsonUtil, SlackUtil}
 import org.apache.commons.lang3.StringUtils
@@ -43,7 +43,7 @@ class DefaultLoadDataInfileService extends LoadDataInfileService {
 
     val savePath =
       s"$jobBasePath/loadDataFromS3-${UserConfig.chainPhase}-$typ-$rand.$blockNumber"
-    S3Util.writeText(bucket, savePath, s"${content.mkString("\n")}\n")
+    GCSUtil.writeText(bucket, savePath, s"${content.mkString("\n")}\n")
 
     Some(savePath)
   }
@@ -52,7 +52,7 @@ class DefaultLoadDataInfileService extends LoadDataInfileService {
                                      dbName: Option[String]): Unit = {
     val bucket = UserConfig.baseBucket
 
-    if (!S3Util.exist(bucket, savePath)) {
+    if (!GCSUtil.exist(bucket, savePath)) {
       SlackUtil.sendMessage(s"cannot find file: $bucket/$savePath")
       return
     }
@@ -79,7 +79,7 @@ class DefaultLoadDataInfileService extends LoadDataInfileService {
                                  |""".stripMargin)
     }
 
-    S3Util.delete(bucket, savePath, false)
+    GCSUtil.delete(bucket, savePath, false)
   }
 
   override def blockLine(block: RefinedBlock): String = {

@@ -2,7 +2,7 @@ package io.klaytn.apps.restore.bulkload
 
 import io.klaytn.model.{Block, ChainPhase}
 import io.klaytn.service.LoadDataInfileService
-import io.klaytn.utils.s3.S3Util
+import io.klaytn.utils.gcs.GCSUtil
 import io.klaytn.utils.spark.SparkHelper
 import org.apache.spark.TaskContext
 
@@ -54,7 +54,7 @@ object BlockMakeData extends SparkHelper with BulkLoadHelper {
         if (m.contains("b") && m("b").nonEmpty) {
           val keyBlock =
             s"${outputKeyPrefix()}/loadDataFromS3/block/$bnp/$partitionId"
-          S3Util.writeText(bucket, keyBlock, s"${m("b").mkString("\n")}\n")
+          GCSUtil.writeText(bucket, keyBlock, s"${m("b").mkString("\n")}\n")
           result.append(keyBlock)
         }
 
@@ -63,7 +63,7 @@ object BlockMakeData extends SparkHelper with BulkLoadHelper {
             case (data, index) =>
               val keyTx =
                 s"${outputKeyPrefix()}/loadDataFromS3/tx/$bnp/$partitionId.$index"
-              S3Util.writeText(bucket, keyTx, s"${data.mkString("\n")}\n")
+              GCSUtil.writeText(bucket, keyTx, s"${data.mkString("\n")}\n")
               result.append(keyTx)
           }
         }
@@ -72,7 +72,9 @@ object BlockMakeData extends SparkHelper with BulkLoadHelper {
             case (data, index) =>
               val keyEventLog =
                 s"${outputKeyPrefix()}/loadDataFromS3/eventlog/$bnp/$partitionId.$index"
-              S3Util.writeText(bucket, keyEventLog, s"${data.mkString("\n")}\n")
+              GCSUtil.writeText(bucket,
+                                keyEventLog,
+                                s"${data.mkString("\n")}\n")
               result.append(keyEventLog)
           }
         }

@@ -13,7 +13,7 @@ import io.klaytn.service.{
   InternalTransactionService,
   LoadDataInfileService
 }
-import io.klaytn.utils.s3.S3Util
+import io.klaytn.utils.gcs.GCSUtil
 import io.klaytn.utils.spark.{SparkHelper, UserConfig}
 
 object KafkaLogToRefinedLogBatch extends SparkHelper {
@@ -39,7 +39,7 @@ object KafkaLogToRefinedLogBatch extends SparkHelper {
   override def run(args: Array[String]): Unit = {
     0 to 1253 foreach { bnp =>
       Seq("blocks", "event_logs", "transaction_receipts").foreach { label =>
-        S3Util.delete(
+        GCSUtil.delete(
           "klaytn-prod-lake",
           s"klaytn/${UserConfig.chainPhase.chain}/label=$label/bnp=$bnp",
           true)
@@ -52,7 +52,7 @@ object KafkaLogToRefinedLogBatch extends SparkHelper {
 
     0 to 1253 foreach { bnp =>
       Seq("internal_transactions").foreach { label =>
-        S3Util.delete(
+        GCSUtil.delete(
           "klaytn-prod-lake",
           s"klaytn/${UserConfig.chainPhase.chain}/label=$label/bnp=$bnp",
           true)

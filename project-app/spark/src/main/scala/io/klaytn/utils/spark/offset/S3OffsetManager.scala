@@ -2,7 +2,7 @@ package io.klaytn.utils.spark.offset
 
 import io.klaytn.utils.JsonUtil
 import io.klaytn.utils.JsonUtil.Implicits._
-import io.klaytn.utils.s3.S3Util
+import io.klaytn.utils.gcs.GCSUtil
 import org.apache.spark.streaming.kafka010.OffsetRange
 
 import scala.util.Try
@@ -19,11 +19,11 @@ class S3OffsetManager {
     val history = OffsetHistory(System.currentTimeMillis(), offsets)
 
     val json = JsonUtil.asJson(history)
-    S3Util.writeText(bucket, key, json)
+    GCSUtil.writeText(bucket, key, json)
   }
 
   def readOffset(bucket: String, key: String): Array[OffsetRange] = {
-    S3Util.readText(bucket, key) match {
+    GCSUtil.readText(bucket, key) match {
       case Some(meta) =>
         Try(JsonUtil.fromJson[OffsetHistory](meta) match {
           case Some(history) =>

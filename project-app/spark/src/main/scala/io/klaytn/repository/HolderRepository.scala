@@ -456,7 +456,7 @@ abstract class HolderRepository(
 
     updatedIds.foreach(id => FinderRedis.del(s"cache/token-holder::$id"))
 
-//    io.klaytn.utils.s3.S3Util
+//    io.klaytn.utils.gcs.GCSUtil
 //      .writeText(UserConfig.baseBucket, s"output/holder/${System.currentTimeMillis()}", msg.mkString("\n"))
   }
 
@@ -522,7 +522,7 @@ abstract class HolderRepository(
   }
 
 //  private def s3logging(contract: String, holder: String, blockNumber: Long, path: String, msg: String): Unit = {
-//    S3Util.writeText(UserConfig.baseBucket,
+//    GCSUtil.writeText(UserConfig.baseBucket,
 //                     s"log/${UserConfig.chainPhase}/${blockNumber / 10000}/$contract/$holder/$path",
 //                     msg)
 //  }

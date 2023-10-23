@@ -7,7 +7,7 @@ import io.klaytn.model.RefinedEventLog
 import io.klaytn.model.finder.{AccountType, Contract, ContractType}
 import io.klaytn.persistent._
 import io.klaytn.utils.klaytn.NumberConverter._
-import io.klaytn.utils.s3.S3Util
+import io.klaytn.utils.gcs.GCSUtil
 import io.klaytn.utils.spark.UserConfig
 import io.klaytn.utils.{SlackUtil, Utils}
 
@@ -296,7 +296,7 @@ class ContractService(
       SparkRedis.set(redisKey, s"${itxs.map(_.id).max}")
       val s3Key =
         s"jobs/io.klaytn.apps.worker.SlowWorkerStreaming/lastId/$redisKey.${UserConfig.chainPhase.chain}"
-      S3Util.writeText(UserConfig.baseBucket, s3Key, s"${itxs.map(_.id).max}")
+      GCSUtil.writeText(UserConfig.baseBucket, s3Key, s"${itxs.map(_.id).max}")
     }
   }
 

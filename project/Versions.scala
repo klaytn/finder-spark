@@ -24,4 +24,5 @@ object Versions {
   val redisson       = "3.16.8"
   val jinjava        = "2.5.2"
   val requests       = "0.7.0"
+  val gcs            = "2.28.0"
 }

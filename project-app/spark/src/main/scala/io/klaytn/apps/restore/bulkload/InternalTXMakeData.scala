@@ -4,7 +4,7 @@ import io.klaytn.model.{ChainPhase, InternalTransaction}
 import io.klaytn.persistent.InternalTransactionPersistentAPI
 import io.klaytn.service.LoadDataInfileService
 import io.klaytn.utils.SlackUtil
-import io.klaytn.utils.s3.S3Util
+import io.klaytn.utils.gcs.GCSUtil
 import io.klaytn.utils.spark.SparkHelper
 import org.apache.spark.TaskContext
 
@@ -94,7 +94,7 @@ object InternalTXMakeData extends SparkHelper with BulkLoadHelper {
                 case (data, index) =>
                   val keyITX =
                     s"${outputKeyPrefix()}/loadDataFromS3/trace/$bnp/$dbName.$partitionId.$index"
-                  S3Util.writeText(bucket, keyITX, s"${data.mkString("\n")}\n")
+                  GCSUtil.writeText(bucket, keyITX, s"${data.mkString("\n")}\n")
                   result.append(s"$keyITX\t$dbName")
               }
             } else if (typ == "i") {
@@ -102,9 +102,9 @@ object InternalTXMakeData extends SparkHelper with BulkLoadHelper {
                 case (data, index) =>
                   val keyITXIndex =
                     s"${outputKeyPrefix()}/loadDataFromS3/trace_index/$bnp/$dbName.$partitionId.$index"
-                  S3Util.writeText(bucket,
-                                   keyITXIndex,
-                                   s"${data.mkString("\n")}\n")
+                  GCSUtil.writeText(bucket,
+                                    keyITXIndex,
+                                    s"${data.mkString("\n")}\n")
                   result.append(s"$keyITXIndex\t$dbName")
               }
             }

@@ -10,7 +10,7 @@ import io.klaytn.persistent.{HolderPersistentAPI, TransferPersistentAPI}
 import io.klaytn.repository._
 import io.klaytn.utils.config.{Constants, FunctionSupport}
 import io.klaytn.utils.klaytn.NumberConverter._
-import io.klaytn.utils.s3.S3Util
+import io.klaytn.utils.gcs.GCSUtil
 import io.klaytn.utils.spark.UserConfig
 import io.klaytn.utils.SlackUtil
 import io.klaytn.model.finder.NFTTransfer
@@ -54,7 +54,7 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
   def saveToS3(key: String, data: String): Unit = {
     val s3Key =
       s"jobs/io.klaytn.apps.worker.FastWorkerStreaming/lastId/$key.${UserConfig.chainPhase.chain}"
-    S3Util.writeText(UserConfig.baseBucket, s3Key, data)
+    GCSUtil.writeText(UserConfig.baseBucket, s3Key, data)
   }
 
   def calAmount(m: mutable.Map[String, (BigInt, Int, Long)],
@@ -249,7 +249,7 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
       .filter(x => !isZeroOrDead(x.holderAddress))
       .foreach(x => holderPersistentAPI.insertKIP17Inventories(Seq(x)))
 
-//    S3Util.writeText(
+//    GCSUtil.writeText(
 //      "klaytn-prod-spark",
 //      s"output/fastworker/nftitems/${System.currentTimeMillis()}.step1.${FunctionSupport
 //        .nftItems(UserConfig.chainPhase)}.$tableId.${nftTransfers.map(_.id.getOrElse(0L)).max}.${nftItems.size}",

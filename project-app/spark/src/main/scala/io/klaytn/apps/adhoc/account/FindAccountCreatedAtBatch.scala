@@ -1,7 +1,7 @@
 package io.klaytn.apps.adhoc.account
 
 import io.klaytn.model.Block
-import io.klaytn.utils.s3.S3Util
+import io.klaytn.utils.gcs.GCSUtil
 import io.klaytn.utils.spark.{SparkHelper, UserConfig}
 
 object FindAccountCreatedAtBatch extends SparkHelper {
@@ -26,7 +26,7 @@ object FindAccountCreatedAtBatch extends SparkHelper {
           s"s3a://klaytn-prod-spark/output/adhoc/account-created-at/${UserConfig.chainPhase.chain}/bnp=$bnp/")
     }
 
-    S3Util.delete(
+    GCSUtil.delete(
       "klaytn-prod-spark",
       s"/output/adhoc/account-created-at/${UserConfig.chainPhase.chain}/last",
       true)
