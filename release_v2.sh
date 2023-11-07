@@ -6,7 +6,7 @@ PROJECT_ROOT=$(cd $(dirname $(readlink ${SCRIPT_PATH} || echo ${SCRIPT_PATH}))/;
 source $PROJECT_ROOT/bin_v2/util/common.sh
 source $PROJECT_ROOT/bin_v2/login.sh
 source $PROJECT_ROOT/bin_v2/cluster.sh
-source $PROJECT_ROOT/bin_v2/s3.sh
+source $PROJECT_ROOT/bin_v2/gcs.sh
 source $PROJECT_ROOT/bin_v2/step.sh
 source $PROJECT_ROOT/bin_v2/code.sh
 source $PROJECT_ROOT/bin_v2/validator.sh
