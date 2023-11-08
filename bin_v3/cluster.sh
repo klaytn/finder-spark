@@ -89,7 +89,7 @@ function cluster_status {
     error "missing cluster id"
     exit 1
   fi
-  gcloud dataproc clusters describe finder-prod-streaming-v2 --region asia-northeast3 | grep state: | awk '{print $2}' | grep -v state: | xargs
+  gcloud dataproc clusters describe $1 --region asia-northeast3 | grep state: | awk '{print $2}' | grep -v state: | xargs
 }
 
 # return yes or no

@@ -152,29 +152,29 @@ You can find the file in the following path.
 
 ## Deploy Streaming Examples
 
-./release_v3.sh finder-prod-streaming-v2 io.klaytn.apps.block.BlockToDBStreaming cypress --build
-./release_v3.sh finder-prod-streaming-v2 io.klaytn.apps.block.BlockToDBStreaming baobab --build
+./release_v3.sh finder-streaming-prod io.klaytn.apps.block.BlockToDBStreaming cypress --build
+./release_v3.sh finder-streaming-prod io.klaytn.apps.block.BlockToDBStreaming baobab --build
 
-./release_v3.sh finder-prod-streaming-v2 io.klaytn.apps.itx.InternalTXToDBStreaming cypress --build
-./release_v3.sh finder-prod-streaming-v2 io.klaytn.apps.itx.InternalTXToDBStreaming baobab --build
+./release_v3.sh finder-streaming-prod io.klaytn.apps.itx.InternalTXToDBStreaming cypress --build
+./release_v3.sh finder-streaming-prod io.klaytn.apps.itx.InternalTXToDBStreaming baobab --build
 
-./release_v3.sh finder-prod-streaming-v2 io.klaytn.apps.account.AccountToDBStreaming cypress --build
-./release_v3.sh finder-prod-streaming-v2 io.klaytn.apps.account.AccountToDBStreaming baobab --build
+./release_v3.sh finder-streaming-prod io.klaytn.apps.account.AccountToDBStreaming cypress --build
+./release_v3.sh finder-streaming-prod io.klaytn.apps.account.AccountToDBStreaming baobab --build
 
-./release_v3.sh finder-prod-streaming-v2 io.klaytn.apps.transfer.TransferToDBStreaming cypress --build
-./release_v3.sh finder-prod-streaming-v2 io.klaytn.apps.transfer.TransferToDBStreaming baobab --build
+./release_v3.sh finder-streaming-prod io.klaytn.apps.transfer.TransferToDBStreaming cypress --build
+./release_v3.sh finder-streaming-prod io.klaytn.apps.transfer.TransferToDBStreaming baobab --build
 
-./release_v3.sh finder-prod-streaming-v2 io.klaytn.apps.worker.FastWorkerStreaming cypress --build
-./release_v3.sh finder-prod-streaming-v2 io.klaytn.apps.worker.FastWorkerStreaming baobab --build
+./release_v3.sh finder-streaming-prod io.klaytn.apps.worker.FastWorkerStreaming cypress --build
+./release_v3.sh finder-streaming-prod io.klaytn.apps.worker.FastWorkerStreaming baobab --build
 
-./release_v3.sh finder-prod-streaming-v2 io.klaytn.apps.worker.SlowWorkerStreaming cypress --build
-./release_v3.sh finder-prod-streaming-v2 io.klaytn.apps.worker.SlowWorkerStreaming baobab --build
+./release_v3.sh finder-streaming-prod io.klaytn.apps.worker.SlowWorkerStreaming cypress --build
+./release_v3.sh finder-streaming-prod io.klaytn.apps.worker.SlowWorkerStreaming baobab --build
 
-./release_v3.sh finder-prod-streaming-v2 io.klaytn.apps.block.BlockToESStreaming cypress --build
-./release_v3.sh finder-prod-streaming-v2 io.klaytn.apps.block.BlockToESStreaming baobab --build
+./release_v3.sh finder-streaming-prod io.klaytn.apps.block.BlockToESStreaming cypress --build
+./release_v3.sh finder-streaming-prod io.klaytn.apps.block.BlockToESStreaming baobab --build
 
-./release_v3.sh finder-prod-streaming-v2 io.klaytn.apps.block.DumpKafkaBlock cypress --build
-./release_v3.sh finder-prod-streaming-v2 io.klaytn.apps.block.DumpKafkaBlock baobab --build
+./release_v3.sh finder-streaming-prod io.klaytn.apps.block.DumpKafkaBlock cypress --build
+./release_v3.sh finder-streaming-prod io.klaytn.apps.block.DumpKafkaBlock baobab --build
 
-./release_v3.sh finder-prod-streaming-v2 io.klaytn.apps.itx.DumpKafkaInternalTX cypress --build
-./release_v3.sh finder-prod-streaming-v2 io.klaytn.apps.itx.DumpKafkaInternalTX baobab --build
+./release_v3.sh finder-streaming-prod io.klaytn.apps.itx.DumpKafkaInternalTX cypress --build
+./release_v3.sh finder-streaming-prod io.klaytn.apps.itx.DumpKafkaInternalTX baobab --build
