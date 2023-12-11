@@ -14,7 +14,9 @@ import io.klaytn.persistent.{
   EventLogPersistentAPI,
   TransactionPersistentAPI
 }
+import scala.util.Try
 import io.klaytn.repository.{BlockBurns, BlockReward}
+import io.klaytn.utils.config.Constants
 import io.klaytn.utils.config.FunctionSupport
 import io.klaytn.utils.klaytn.NumberConverter.{BigIntConverter, StringConverter}
 import io.klaytn.utils.spark.UserConfig
@@ -25,6 +27,9 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{Dataset, SaveMode, SparkSession}
+import scala.concurrent.{Future, Await}
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.duration.Duration
 
 import java.text.SimpleDateFormat
 import java.util.{Calendar, TimeZone}
@@ -523,9 +528,106 @@ class BlockService(blockPersistentAPI: LazyEval[BlockPersistentAPI],
     (longTime, result)
   }
 
+  def processParallel(
+      block: Block,
+      jobBasePath: String): (Seq[String], Seq[(String, String)]) = {
+    val longTime = ArrayBuffer.empty[String]
+    var start = System.currentTimeMillis()
+
+    val refinedData = block.toRefined
+
+    longTime.append(
+      s"#2 block.toRefined: ${System.currentTimeMillis() - start}")
+    start = System.currentTimeMillis()
+
+    val refinedBlock = refinedData._1
+    val refinedTransactionReceipts = refinedData._2
+    val refinedEventLogs = refinedData._3
+
+    val result = ArrayBuffer.empty[(String, String)]
+    result.append(("blockNumber", refinedBlock.number.toString))
+
+    // Define functions to execute tasks concurrently
+    def insertBlock(): Future[Unit] = Future {
+      this.saveBlockToMysql(List(refinedBlock))
+    }
+
+    def insertBlockRewards(): Future[Unit] = Future {
+      if (FunctionSupport.blockReward(UserConfig.chainPhase))
+        saveBlockRewardToMysql(refinedBlock.number)
+    }
+
+    def insertTransactions(): Future[Unit] = Future {
+      if (refinedTransactionReceipts.length < 300) {
+        this.saveTransactionReceiptsToMysql(refinedTransactionReceipts)
+      } else {
+        val transactionLines =
+          loadDataInfileService.transactionReceiptLines(
+            refinedTransactionReceipts)
+        val txLoadFile =
+          loadDataInfileService.writeLoadData(jobBasePath,
+                                              "tx",
+                                              refinedBlock.number,
+                                              transactionLines)
+        if (txLoadFile.isDefined) {
+          result.append(("tx", txLoadFile.get))
+        }
+      }
+    }
+
+    def insertEventLogs(): Future[Unit] = Future {
+      if (refinedEventLogs.length < 50) {
+        this.saveEventLogToMysql(refinedEventLogs)
+      } else {
+        val eventLogLines =
+          loadDataInfileService.eventLogLines(refinedEventLogs)
+        val logLoadFile =
+          loadDataInfileService.writeLoadData(jobBasePath,
+                                              "eventlog",
+                                              refinedBlock.number,
+                                              eventLogLines)
+        if (logLoadFile.isDefined) {
+          result.append(("eventLog", logLoadFile.get))
+        }
+      }
+    }
+
+    // Execute tasks concurrently
+    val insertBlockFuture = insertBlock()
+    val insertBlockRewardsFuture = insertBlockRewards()
+    val insertTransactionsFuture = insertTransactions()
+    val insertEventLogsFuture = insertEventLogs()
+
+    // Wait for all tasks to complete
+    val combinedFuture = Future.sequence(
+      Seq(
+        insertBlockFuture,
+        insertBlockRewardsFuture,
+        insertTransactionsFuture,
+        insertEventLogsFuture
+      ))
+
+    // Await for the completion of all tasks, max 5 seconds
+    Await.ready(combinedFuture, Duration(5, "seconds"))
+
+    longTime.append(s"#2 insert block: ${System.currentTimeMillis() - start}")
+    start = System.currentTimeMillis()
+
+    FinderRedis.setex(s"block:${refinedBlock.number}",
+                      3600,
+                      refinedBlock.timestamp.toString)
+    longTime.append(
+      s"#4 set block to redis: ${System.currentTimeMillis() - start}")
+
+    // Return the result
+    (longTime, result)
+  }
+
   def procBurnFeeByBlockRewardInfo(): Unit = {
     val (maxBlockNumber, accumulateFees0, accumulateKlay) =
       blockPersistentAPI.getLatestBlockBurnInfo()
+    val accumulateKlay0 =
+      caverService.getBalance(Constants.DeadAddress, maxBlockNumber)
 
     var expectedBlockNumber = maxBlockNumber + 1 // process data only as far as the block is sequentially incremented
 
@@ -555,7 +657,7 @@ class BlockService(blockPersistentAPI: LazyEval[BlockPersistentAPI],
         BlockBurns(blockNumber,
                    burntFees,
                    accumulateFees,
-                   accumulateKlay,
+                   accumulateKlay0,
                    timestamp)
     }
 
