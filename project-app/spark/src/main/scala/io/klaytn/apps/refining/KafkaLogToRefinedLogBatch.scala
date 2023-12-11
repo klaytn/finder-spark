@@ -45,7 +45,7 @@ object KafkaLogToRefinedLogBatch extends SparkHelper {
           true)
       }
       val input =
-        s"s3a://klaytn-prod-lake/klaytn/${UserConfig.chainPhase.chain}/label=kafka_log/topic=block/bnp=$bnp/*.gz"
+        s"gs://klaytn-prod-lake/klaytn/${UserConfig.chainPhase.chain}/label=kafka_log/topic=block/bnp=$bnp/*.gz"
       val blockRDD = sc.textFile(input).flatMap(Block.parse).map(_.toRefined)
       blockService.saveBlockToS3(blockRDD, UserConfig.logStorageS3Path, 8, true)
     }
@@ -59,7 +59,7 @@ object KafkaLogToRefinedLogBatch extends SparkHelper {
       }
       val traceRDD = sc
         .textFile(
-          s"s3a://klaytn-prod-lake/klaytn/${UserConfig.chainPhase.chain}/label=kafka_log/topic=trace/bnp=$bnp/*.gz")
+          s"gs://klaytn-prod-lake/klaytn/${UserConfig.chainPhase.chain}/label=kafka_log/topic=trace/bnp=$bnp/*.gz")
         .flatMap { line =>
           InternalTransaction.parse(line) match {
             case Some(internalTransaction: InternalTransaction) =>

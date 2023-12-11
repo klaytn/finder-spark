@@ -43,7 +43,7 @@ object InternalTXMakeData extends SparkHelper with BulkLoadHelper {
     }
   }
   def _procMakeData(bnp: Int, numPartition: Int): Unit = {
-    val path = s"s3a://${kafkaLogDirPrefix()}/topic=trace/bnp=$bnp/*.gz"
+    val path = s"gs://${kafkaLogDirPrefix()}/topic=trace/bnp=$bnp/*.gz"
     val rdd = sc.textFile(path)
     rdd
       .repartition(256)
@@ -114,7 +114,7 @@ object InternalTXMakeData extends SparkHelper with BulkLoadHelper {
       }
       .repartition(16)
       .saveAsTextFile(
-        s"s3a://${outputDirPrefix()}/loadDataFromS3/list/trace/$bnp")
+        s"gs://${outputDirPrefix()}/loadDataFromS3/list/trace/$bnp")
   }
 
   override def run(args: Array[String]): Unit = {

@@ -15,7 +15,7 @@ object BlockMakeData extends SparkHelper with BulkLoadHelper {
 
   def procMakeData(bnp: Int, numPartition: Int): Unit = {
     val rdd =
-      sc.textFile(s"s3a://${kafkaLogDirPrefix()}/topic=block/bnp=$bnp/*.gz")
+      sc.textFile(s"gs://${kafkaLogDirPrefix()}/topic=block/bnp=$bnp/*.gz")
     rdd
       .repartition(256)
       .flatMap { line =>
@@ -83,7 +83,7 @@ object BlockMakeData extends SparkHelper with BulkLoadHelper {
       }
       .repartition(16)
       .saveAsTextFile(
-        s"s3a://${outputDirPrefix()}/loadDataFromS3/list/block/$bnp")
+        s"gs://${outputDirPrefix()}/loadDataFromS3/list/block/$bnp")
   }
 
   override def run(args: Array[String]): Unit = {

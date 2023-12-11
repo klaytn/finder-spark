@@ -27,7 +27,7 @@ object ApproveBurnBatch extends SparkHelper with BulkLoadHelper {
 
   def approveBurn(bnp: Int, noPartition: Int): Unit = {
     val rdd =
-      sc.textFile(s"s3a://${kafkaLogDirPrefix()}/topic=block/bnp=$bnp/*.gz")
+      sc.textFile(s"gs://${kafkaLogDirPrefix()}/topic=block/bnp=$bnp/*.gz")
     if (!rdd.isEmpty()) {
       rdd
         .repartition(noPartition)

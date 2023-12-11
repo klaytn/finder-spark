@@ -24,7 +24,7 @@ object CounterBatch extends SparkHelper with BulkLoadHelper {
 
   def totalTransfer(bnp: Int, noPartition: Int): Unit = {
     val rdd =
-      sc.textFile(s"s3a://${kafkaLogDirPrefix()}/topic=block/bnp=$bnp/*.gz")
+      sc.textFile(s"gs://${kafkaLogDirPrefix()}/topic=block/bnp=$bnp/*.gz")
     if (!rdd.isEmpty()) {
       rdd
         .flatMap { line =>
@@ -74,7 +74,7 @@ object CounterBatch extends SparkHelper with BulkLoadHelper {
 
   def totalTransaction(bnp: Int, noPartition: Int): Unit = {
     val rdd =
-      sc.textFile(s"s3a://${kafkaLogDirPrefix()}/topic=block/bnp=$bnp/*.gz")
+      sc.textFile(s"gs://${kafkaLogDirPrefix()}/topic=block/bnp=$bnp/*.gz")
     if (!rdd.isEmpty()) {
       rdd
         .flatMap { line =>

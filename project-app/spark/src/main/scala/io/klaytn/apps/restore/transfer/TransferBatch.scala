@@ -27,7 +27,7 @@ object TransferBatch extends SparkHelper with BulkLoadHelper {
 
   def tokenTransfer(bnp: Int, noPartition: Int): Unit = {
     val rdd =
-      sc.textFile(s"s3a://${kafkaLogDirPrefix()}/topic=block/bnp=$bnp/*.gz")
+      sc.textFile(s"gs://${kafkaLogDirPrefix()}/topic=block/bnp=$bnp/*.gz")
     if (!rdd.isEmpty()) {
       rdd
         .repartition(noPartition)
@@ -76,12 +76,12 @@ object TransferBatch extends SparkHelper with BulkLoadHelper {
             Seq.empty
         }
       }
-      .saveAsTextFile(s"s3a://${outputDirPrefix()}/token_transfers2/$bnp")
+      .saveAsTextFile(s"gs://${outputDirPrefix()}/token_transfers2/$bnp")
   }
 
   def tokenTransferSaveAsFile(bnp: Int, noPartition: Int): Unit = {
     val rdd = sc
-      .textFile(s"s3a://${kafkaLogDirPrefix()}/topic=block/bnp=$bnp/*.gz")
+      .textFile(s"gs://${kafkaLogDirPrefix()}/topic=block/bnp=$bnp/*.gz")
       .repartition(noPartition)
     tokenTransferSaveAsFile(rdd, bnp)
   }
@@ -99,7 +99,7 @@ object TransferBatch extends SparkHelper with BulkLoadHelper {
     }
 
     val rdd = sc
-      .textFile(s"s3a://${kafkaLogDirPrefix()}/topic=block/bnp=$bnp/*.gz")
+      .textFile(s"gs://${kafkaLogDirPrefix()}/topic=block/bnp=$bnp/*.gz")
       .repartition(noPartition)
     // nft transfer
     rdd.repartition(noPartition).foreachPartition { iter =>
@@ -145,12 +145,12 @@ object TransferBatch extends SparkHelper with BulkLoadHelper {
             Seq.empty
         }
       }
-      .saveAsTextFile(s"s3a://${outputDirPrefix()}/nft_transfers2/$bnp")
+      .saveAsTextFile(s"gs://${outputDirPrefix()}/nft_transfers2/$bnp")
   }
 
   def nftTransferSaveAsFile(bnp: Int, noPartition: Int): Unit = {
     val rdd = sc
-      .textFile(s"s3a://${kafkaLogDirPrefix()}/topic=block/bnp=$bnp/*.gz")
+      .textFile(s"gs://${kafkaLogDirPrefix()}/topic=block/bnp=$bnp/*.gz")
       .repartition(noPartition)
     // nft transfer
     nftTransferSaveAsFile(rdd, bnp)
@@ -159,7 +159,7 @@ object TransferBatch extends SparkHelper with BulkLoadHelper {
   def tokenTransferAndNFTTransferSaveAsFile(bnp: Int,
                                             noPartition: Int): Unit = {
     val rdd = sc
-      .textFile(s"s3a://${kafkaLogDirPrefix()}/topic=block/bnp=$bnp/*.gz")
+      .textFile(s"gs://${kafkaLogDirPrefix()}/topic=block/bnp=$bnp/*.gz")
       .repartition(noPartition)
 
     rdd.cache()
@@ -175,7 +175,7 @@ object TransferBatch extends SparkHelper with BulkLoadHelper {
 
   def accountTransferContracts(bnp: Int, noPartition: Int): Unit = {
     val rdd =
-      sc.textFile(s"s3a://${kafkaLogDirPrefix()}/topic=block/bnp=$bnp/*.gz")
+      sc.textFile(s"gs://${kafkaLogDirPrefix()}/topic=block/bnp=$bnp/*.gz")
     if (!rdd.isEmpty()) {
       rdd
         .repartition(noPartition)
