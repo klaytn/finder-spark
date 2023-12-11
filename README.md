@@ -57,7 +57,7 @@ If you want to run a specific test, you can run it with the following command.
 
 ---
 
-### Run the release_v3.sh script
+### Run the release.sh script
 
 - **cluster_id**: EMR ClusterId to deploy
 - **canonical_name**: Focus on the code you want to deploy in the Intellij project tree view, then copy it with "cmd + option + shift + c".
@@ -65,11 +65,11 @@ If you want to run a specific test, you can run it with the following command.
 - **chain**: Enter the chain name corresponding to Chain.scala.
 - **--build**: If this parameter exists, it will create a jar using `sbt clean assembly`. If not specified, the previously created jar will be deployed.
 
-> `./release_v3.sh {cluster_id} {canonical_name} {chain} [--build]`
+> `./release.sh {cluster_id} {canonical_name} {chain} [--build]`
 
 Example
 
-- > `./release_v3.sh j-5U3NWQOKI59S io.klaytn.apps.block.BlockToDBStreaming cypress --build`
+- > `./release.sh finder-streaming-prod io.klaytn.apps.block.BlockToDBStreaming cypress --build`
 
 ### Notes
 
@@ -102,79 +102,96 @@ You can find the file in the following path.
 
 ## Deploy Batch Examples
 
-./release_v3.sh j-5U3NWQOKI59S io.klaytn.apps.refining.RestoreKafkaLogBatch cypress --build
-./release_v3.sh j-5U3NWQOKI59S io.klaytn.apps.refining.RestoreKafkaLogBatch baobab --build
+./release.sh finder-batch-prod io.klaytn.apps.refining.RestoreKafkaLogBatch cypress --build
+./release.sh finder-batch-prod io.klaytn.apps.refining.RestoreKafkaLogBatch baobab --build
 
-./release_v3.sh j-5U3NWQOKI59S io.klaytn.apps.restore.bulkload.BlockMakeData cypress --build
-./release_v3.sh j-5U3NWQOKI59S io.klaytn.apps.restore.bulkload.BlockMakeData baobab --build
+./release.sh finder-batch-prod io.klaytn.apps.restore.bulkload.BlockMakeData cypress --build
+./release.sh finder-batch-prod io.klaytn.apps.restore.bulkload.BlockMakeData baobab --build
 
-./release_v3.sh j-5U3NWQOKI59S io.klaytn.apps.restore.bulkload.InternalTXMakeData cypress --build
-./release_v3.sh j-5U3NWQOKI59S io.klaytn.apps.restore.bulkload.InternalTXMakeData baobab --build
+./release.sh finder-batch-prod io.klaytn.apps.restore.bulkload.InternalTXMakeData cypress --build
+./release.sh finder-batch-prod io.klaytn.apps.restore.bulkload.InternalTXMakeData baobab --build
 
-./release_v3.sh j-5U3NWQOKI59S io.klaytn.apps.restore.bulkload.AccountMakeData cypress --build
-./release_v3.sh j-5U3NWQOKI59S io.klaytn.apps.restore.bulkload.AccountMakeData baobab --build
+./release.sh finder-batch-prod io.klaytn.apps.restore.bulkload.AccountMakeData cypress --build
+./release.sh finder-batch-prod io.klaytn.apps.restore.bulkload.AccountMakeData baobab --build
 
-./release_v3.sh j-5U3NWQOKI59S io.klaytn.apps.restore.bulkload.BlockLoadData cypress --build
-./release_v3.sh j-5U3NWQOKI59S io.klaytn.apps.restore.bulkload.BlockLoadData baobab --build
+./release.sh finder-batch-prod io.klaytn.apps.restore.bulkload.BlockLoadData cypress --build
+./release.sh finder-batch-prod io.klaytn.apps.restore.bulkload.BlockLoadData baobab --build
 
-./release_v3.sh j-5U3NWQOKI59S io.klaytn.apps.restore.bulkload.InternalTXLoadData cypress --build
-./release_v3.sh j-5U3NWQOKI59S io.klaytn.apps.restore.bulkload.InternalTXLoadData baobab --build
+./release.sh finder-batch-prod io.klaytn.apps.restore.bulkload.InternalTXLoadData cypress --build
+./release.sh finder-batch-prod io.klaytn.apps.restore.bulkload.InternalTXLoadData baobab --build
 
-./release_v3.sh j-5U3NWQOKI59S io.klaytn.apps.restore.bulkload.AccountLoadData cypress --build
-./release_v3.sh j-5U3NWQOKI59S io.klaytn.apps.restore.bulkload.AccountLoadData baobab --build
+./release.sh finder-batch-prod io.klaytn.apps.restore.bulkload.AccountLoadData cypress --build
+./release.sh finder-batch-prod io.klaytn.apps.restore.bulkload.AccountLoadData baobab --build
 
-./release_v3.sh j-5U3NWQOKI59S io.klaytn.apps.restore.approveBurn.ApproveBurnBatch cypress --build
-./release_v3.sh j-5U3NWQOKI59S io.klaytn.apps.restore.approveBurn.ApproveBurnBatch baobab --build
+./release.sh finder-batch-prod io.klaytn.apps.restore.approveBurn.ApproveBurnBatch cypress --build
+./release.sh finder-batch-prod io.klaytn.apps.restore.approveBurn.ApproveBurnBatch baobab --build
 
-./release_v3.sh j-5U3NWQOKI59S io.klaytn.apps.restore.transfer.TransferBatch cypress --build
-./release_v3.sh j-5U3NWQOKI59S io.klaytn.apps.restore.transfer.TransferBatch baobab --build
+./release.sh finder-batch-prod io.klaytn.apps.restore.transfer.TransferBatch cypress --build
+./release.sh finder-batch-prod io.klaytn.apps.restore.transfer.TransferBatch baobab --build
 
-./release_v3.sh j-5U3NWQOKI59S io.klaytn.apps.adhoc.block.LoadBlockRewardBatch cypress --build
-./release_v3.sh j-5U3NWQOKI59S io.klaytn.apps.adhoc.block.LoadBlockRewardBatch baobab --build
+./release.sh finder-batch-prod io.klaytn.apps.adhoc.block.LoadBlockRewardBatch cypress --build
+./release.sh finder-batch-prod io.klaytn.apps.adhoc.block.LoadBlockRewardBatch baobab --build
 
-./release_v3.sh j-5U3NWQOKI59S io.klaytn.apps.restore.holder.HolderBatch cypress --build
-./release_v3.sh j-5U3NWQOKI59S io.klaytn.apps.restore.holder.HolderBatch baobab --build
+./release.sh finder-batch-prod io.klaytn.apps.restore.holder.HolderBatch cypress --build
+./release.sh finder-batch-prod io.klaytn.apps.restore.holder.HolderBatch baobab --build
 
-./release_v3.sh j-5U3NWQOKI59S io.klaytn.apps.restore.holder.MinusHolderBatch cypress --build
-./release_v3.sh j-5U3NWQOKI59S io.klaytn.apps.restore.holder.MinusHolderBatch baobab --build
+./release.sh finder-batch-prod io.klaytn.apps.restore.holder.MinusHolderBatch cypress --build
+./release.sh finder-batch-prod io.klaytn.apps.restore.holder.MinusHolderBatch baobab --build
 
-./release_v3.sh j-5U3NWQOKI59S io.klaytn.apps.restore.count.CounterBatch cypress --build
-./release_v3.sh j-5U3NWQOKI59S io.klaytn.apps.restore.count.CounterBatch baobab --build
+./release.sh finder-batch-prod io.klaytn.apps.restore.count.CounterBatch cypress --build
+./release.sh finder-batch-prod io.klaytn.apps.restore.count.CounterBatch baobab --build
 
-./release_v3.sh j-5U3NWQOKI59S io.klaytn.apps.restore.es.TransactionESRecoveryBatch cypress --build
-./release_v3.sh j-5U3NWQOKI59S io.klaytn.apps.restore.es.TransactionESRecoveryBatch baobab --build
+./release.sh finder-batch-prod io.klaytn.apps.restore.es.TransactionESRecoveryBatch cypress --build
+./release.sh finder-batch-prod io.klaytn.apps.restore.es.TransactionESRecoveryBatch baobab --build
 
-./release_v3.sh j-5U3NWQOKI59S io.klaytn.apps.restore.es.AccountESRecoveryBatch cypress --build
-./release_v3.sh j-5U3NWQOKI59S io.klaytn.apps.restore.es.AccountESRecoveryBatch baobab --build
+./release.sh finder-batch-prod io.klaytn.apps.restore.es.AccountESRecoveryBatch cypress --build
+./release.sh finder-batch-prod io.klaytn.apps.restore.es.AccountESRecoveryBatch baobab --build
 
-./release_v3.sh j-5U3NWQOKI59S io.klaytn.apps.restore.es.ContractESRecoveryBatch cypress --build
-./release_v3.sh j-5U3NWQOKI59S io.klaytn.apps.restore.es.ContractESRecoveryBatch baobab --build
+./release.sh finder-batch-prod io.klaytn.apps.restore.es.ContractESRecoveryBatch cypress --build
+./release.sh finder-batch-prod io.klaytn.apps.restore.es.ContractESRecoveryBatch baobab --build
+
+./release.sh finder-batch-prod io.klaytn.apps.restore.blockBurn.BlockBurn baobab --build
+./release.sh finder-batch-prod io.klaytn.apps.restore.blockBurn.BlockBurn cypress --build
 
 ## Deploy Streaming Examples
 
-./release_v3.sh finder-streaming-prod io.klaytn.apps.block.BlockToDBStreaming cypress --build
-./release_v3.sh finder-streaming-prod io.klaytn.apps.block.BlockToDBStreaming baobab --build
+./release.sh finder-streaming-prod io.klaytn.apps.block.BlockToDBStreaming cypress --build
+./release.sh finder-streaming-prod io.klaytn.apps.block.BlockToDBStreaming baobab --build
 
-./release_v3.sh finder-streaming-prod io.klaytn.apps.itx.InternalTXToDBStreaming cypress --build
-./release_v3.sh finder-streaming-prod io.klaytn.apps.itx.InternalTXToDBStreaming baobab --build
+./release.sh finder-streaming-prod io.klaytn.apps.itx.InternalTXToDBStreaming cypress --build
+./release.sh finder-streaming-prod io.klaytn.apps.itx.InternalTXToDBStreaming baobab --build
 
-./release_v3.sh finder-streaming-prod io.klaytn.apps.account.AccountToDBStreaming cypress --build
-./release_v3.sh finder-streaming-prod io.klaytn.apps.account.AccountToDBStreaming baobab --build
+./release.sh finder-streaming-prod io.klaytn.apps.account.AccountToDBStreaming cypress --build
+./release.sh finder-streaming-prod io.klaytn.apps.account.AccountToDBStreaming baobab --build
 
-./release_v3.sh finder-streaming-prod io.klaytn.apps.transfer.TransferToDBStreaming cypress --build
-./release_v3.sh finder-streaming-prod io.klaytn.apps.transfer.TransferToDBStreaming baobab --build
+./release.sh finder-streaming-prod io.klaytn.apps.transfer.TransferToDBStreaming cypress --build
+./release.sh finder-streaming-prod io.klaytn.apps.transfer.TransferToDBStreaming baobab --build
 
-./release_v3.sh finder-streaming-prod io.klaytn.apps.worker.FastWorkerStreaming cypress --build
-./release_v3.sh finder-streaming-prod io.klaytn.apps.worker.FastWorkerStreaming baobab --build
+./release.sh finder-streaming-prod io.klaytn.apps.worker.FastWorkerStreaming cypress --build
+./release.sh finder-streaming-prod io.klaytn.apps.worker.FastWorkerStreaming baobab --build
 
-./release_v3.sh finder-streaming-prod io.klaytn.apps.worker.SlowWorkerStreaming cypress --build
-./release_v3.sh finder-streaming-prod io.klaytn.apps.worker.SlowWorkerStreaming baobab --build
+./release.sh finder-streaming-prod io.klaytn.apps.worker.SlowWorkerStreaming cypress --build
+./release.sh finder-streaming-prod io.klaytn.apps.worker.SlowWorkerStreaming baobab --build
 
-./release_v3.sh finder-streaming-prod io.klaytn.apps.block.BlockToESStreaming cypress --build
-./release_v3.sh finder-streaming-prod io.klaytn.apps.block.BlockToESStreaming baobab --build
+./release.sh finder-streaming-prod io.klaytn.apps.block.BlockToESStreaming cypress --build
+./release.sh finder-streaming-prod io.klaytn.apps.block.BlockToESStreaming baobab --build
 
-./release_v3.sh finder-streaming-prod io.klaytn.apps.block.DumpKafkaBlock cypress --build
-./release_v3.sh finder-streaming-prod io.klaytn.apps.block.DumpKafkaBlock baobab --build
+./release.sh finder-streaming-prod io.klaytn.apps.block.DumpKafkaBlock cypress --build
+./release.sh finder-streaming-prod io.klaytn.apps.block.DumpKafkaBlock baobab --build
 
-./release_v3.sh finder-streaming-prod io.klaytn.apps.itx.DumpKafkaInternalTX cypress --build
-./release_v3.sh finder-streaming-prod io.klaytn.apps.itx.DumpKafkaInternalTX baobab --build
+./release.sh finder-streaming-prod io.klaytn.apps.itx.DumpKafkaInternalTX cypress --build
+./release.sh finder-streaming-prod io.klaytn.apps.itx.DumpKafkaInternalTX baobab --build
+
+
+
+spark:app:prod-cypress:HolderService:NFT:LastBlock
+132636685
+
+spark:app:prod-cypress:HolderService:NFT:TokenURI:LastBlock
+0
+
+spark:app:prod-cypress:HolderService:Token:LastBlock
+785874903
+
+spark:app:prod-cypress:HolderService:TokenBurn:LastBlock
+584969283
