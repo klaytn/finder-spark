@@ -10,8 +10,5 @@ data-lake
 .bloop
 .metals
 metals.sbt
-*.conf
-!*example.conf
-
-dev.env.sh
-prod.env.sh
+all.cypress.conf
+all.baobab.conf

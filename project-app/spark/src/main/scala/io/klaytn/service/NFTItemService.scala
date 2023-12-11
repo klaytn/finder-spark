@@ -5,7 +5,7 @@ import io.klaytn.contract.lib.KIP37MetadataReader
 import io.klaytn.model.finder.ContractType
 import io.klaytn.persistent.NFTItemPersistentAPI
 import io.klaytn.repository.NFTItem
-import io.klaytn.utils.s3.S3Util
+import io.klaytn.utils.gcs.GCSUtil
 
 class NFTItemService(nftItemPersistentAPI: LazyEval[NFTItemPersistentAPI],
                      contractService: LazyEval[ContractService])
@@ -19,7 +19,7 @@ class NFTItemService(nftItemPersistentAPI: LazyEval[NFTItemPersistentAPI],
       contractAddress,
       tokenId)
 
-    S3Util.writeText(
+    GCSUtil.writeText(
       "klaytn-prod-spark",
       s"output/fastworker/nftitems/${System
         .currentTimeMillis()}.step2.$contractAddress.$tokenId.$a",
@@ -59,7 +59,7 @@ class NFTItemService(nftItemPersistentAPI: LazyEval[NFTItemPersistentAPI],
                       Option(BigInt(0)),
                       0L)
             }
-          S3Util.writeText(
+          GCSUtil.writeText(
             "klaytn-prod-spark",
             s"output/fastworker/nftitems/${System.currentTimeMillis()}.step3.$nftItem",
             ""

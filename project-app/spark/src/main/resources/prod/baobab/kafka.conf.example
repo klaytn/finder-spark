@@ -1,8 +1,0 @@
-spark.app.kafka {
-    bootstrap.servers = ENV_KAFKA_BOOTSTRAP_SERVERS
-
-    topic.list {
-        block = baobab.klaytn.chaindatafetcher.en-0.blockgroup.v1
-        internalTransaction = baobab.klaytn.chaindatafetcher.en-0.tracegroup.v1
-    }
-}

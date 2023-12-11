@@ -13,7 +13,7 @@ import io.klaytn.service.{
   InternalTransactionService,
   LoadDataInfileService
 }
-import io.klaytn.utils.s3.S3Util
+import io.klaytn.utils.gcs.GCSUtil
 import io.klaytn.utils.spark.{SparkHelper, UserConfig}
 
 object KafkaLogToRefinedLogBatch extends SparkHelper {
@@ -39,27 +39,27 @@ object KafkaLogToRefinedLogBatch extends SparkHelper {
   override def run(args: Array[String]): Unit = {
     0 to 1253 foreach { bnp =>
       Seq("blocks", "event_logs", "transaction_receipts").foreach { label =>
-        S3Util.delete(
+        GCSUtil.delete(
           "klaytn-prod-lake",
           s"klaytn/${UserConfig.chainPhase.chain}/label=$label/bnp=$bnp",
           true)
       }
       val input =
-        s"s3a://klaytn-prod-lake/klaytn/${UserConfig.chainPhase.chain}/label=kafka_log/topic=block/bnp=$bnp/*.gz"
+        s"gs://klaytn-prod-lake/klaytn/${UserConfig.chainPhase.chain}/label=kafka_log/topic=block/bnp=$bnp/*.gz"
       val blockRDD = sc.textFile(input).flatMap(Block.parse).map(_.toRefined)
       blockService.saveBlockToS3(blockRDD, UserConfig.logStorageS3Path, 8, true)
     }
 
     0 to 1253 foreach { bnp =>
       Seq("internal_transactions").foreach { label =>
-        S3Util.delete(
+        GCSUtil.delete(
           "klaytn-prod-lake",
           s"klaytn/${UserConfig.chainPhase.chain}/label=$label/bnp=$bnp",
           true)
       }
       val traceRDD = sc
         .textFile(
-          s"s3a://klaytn-prod-lake/klaytn/${UserConfig.chainPhase.chain}/label=kafka_log/topic=trace/bnp=$bnp/*.gz")
+          s"gs://klaytn-prod-lake/klaytn/${UserConfig.chainPhase.chain}/label=kafka_log/topic=trace/bnp=$bnp/*.gz")
         .flatMap { line =>
           InternalTransaction.parse(line) match {
             case Some(internalTransaction: InternalTransaction) =>

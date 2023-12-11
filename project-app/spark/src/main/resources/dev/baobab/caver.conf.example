@@ -1,2 +1,0 @@
-spark.app.caver.url = ENV_RPC_URL
-spark.app.caver2.url = ENV_RPC_URL

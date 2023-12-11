@@ -16,7 +16,8 @@ libraryDependencies ++= Seq(
   "com.hubspot.jinjava"           % "jinjava"                     % Versions.jinjava,
   "com.lihaoyi"                   %% "requests"                   % Versions.requests,
   "com.amazonaws"                 % "aws-java-sdk-sqs"            % Versions.awsSDK,
-  "org.apache.httpcomponents"     % "httpclient"                  % "4.5.14"
+  "org.apache.httpcomponents"     % "httpclient"                  % "4.5.14",
+  "com.google.cloud"              % "google-cloud-storage"        % Versions.gcs,
 )
 
 libraryDependencies ++= Dependencies.circe

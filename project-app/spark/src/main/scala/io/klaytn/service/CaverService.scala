@@ -51,6 +51,10 @@ class CaverService(caverUrl: String,
     Try(BigInt(caver.rpc.klay.getTransactionCount(address).send().getValue))
       .getOrElse(BigInt(0))
 
+  def getBalance(address: String, blockNumber: Long): BigInt = {
+    BigInt(caver.rpc.klay.getBalance(address).send().getValue)
+  }
+
   def getNFT(contractAddress: String): Option[Contract] = {
     try {
       val kip17 = new KIP17MetadataReader(caver)

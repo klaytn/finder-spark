@@ -15,7 +15,7 @@ class KlaytnNameServiceRepository extends AbstractRepository {
   def insert(klaytnNameService: KlaytnNameService): Unit = {
     withDB(DB) { c =>
       val pstmt = c.prepareStatement(
-        s"INSERT INTO $Table (`name`,`resolved_address`,`resolver_address`,`name_hash`,`token_id`) VALUES (?,?,?,?,?)")
+        s"INSERT IGNORE INTO $Table (`name`,`resolved_address`,`resolver_address`,`name_hash`,`token_id`) VALUES (?,?,?,?,?)")
 
       pstmt.setString(1, klaytnNameService.name)
       pstmt.setString(2, klaytnNameService.resolvedAddress)
