@@ -3,13 +3,12 @@
 RELEASE="true"
 SCRIPT_PATH=${BASH_SOURCE[0]}
 PROJECT_ROOT=$(cd $(dirname $(readlink ${SCRIPT_PATH} || echo ${SCRIPT_PATH}))/;/bin/pwd)
-source $PROJECT_ROOT/bin_v2/util/common.sh
-source $PROJECT_ROOT/bin_v2/login.sh
-source $PROJECT_ROOT/bin_v2/cluster.sh
-source $PROJECT_ROOT/bin_v2/gcs.sh
-source $PROJECT_ROOT/bin_v2/step.sh
-source $PROJECT_ROOT/bin_v2/code.sh
-source $PROJECT_ROOT/bin_v2/validator.sh
+source $PROJECT_ROOT/gcp/util/common.sh
+source $PROJECT_ROOT/gcp/login.sh
+source $PROJECT_ROOT/gcp/gcs.sh
+source $PROJECT_ROOT/gcp/step.sh
+source $PROJECT_ROOT/gcp/code.sh
+source $PROJECT_ROOT/gcp/validator.sh
 
 function parse_parameters {
   while [[ $# -gt 0 ]]; do
@@ -44,6 +43,28 @@ BUILD=""
 PROGRAM_ARGS=""
 POSITIONAL_ARGS=()
 parse_parameters $@
+
+
+PS3="Select phase: "
+    select PHASE in "prod" "dev"
+    do
+        case $PHASE in
+            "prod")
+                break
+                ;;
+            "dev")
+                break
+                ;;
+            *)
+                echo "Invalid PHASE"
+                exit 1
+                break
+                ;;
+        esac
+    done
+
+export S3_BUCKET="klaytn-$PHASE-lake"
+export S3_JAR_PATH="gs://klaytn-$PHASE-spark/jars"
 
 function main() {
   local usage="$0 \$CLUSTER_ID \$MAIN_CLASS \$CHAIN"

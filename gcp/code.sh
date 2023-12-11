@@ -2,7 +2,7 @@
 
 SCRIPT_PATH=${BASH_SOURCE[0]}
 PROJECT_ROOT=$(cd $(dirname $(readlink ${SCRIPT_PATH} || echo ${SCRIPT_PATH}))/../;/bin/pwd)
-source $PROJECT_ROOT/bin_v3/util/common.sh
+source $PROJECT_ROOT/gcp/util/common.sh
 
 function code_load_project_name_from_class() {
   local class_name=$1

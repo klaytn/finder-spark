@@ -2,18 +2,20 @@
 
 SCRIPT_PATH=${BASH_SOURCE[0]}
 PROJECT_ROOT=$(cd $(dirname $(readlink ${SCRIPT_PATH} || echo ${SCRIPT_PATH}))/../;/bin/pwd)
-source $PROJECT_ROOT/bin_v2/util/common.sh
-source $PROJECT_ROOT/bin_v2/login.sh
-source $PROJECT_ROOT/bin_v2/validator.sh
-source $PROJECT_ROOT/bin_v2/hocon_cli.sh
-source $PROJECT_ROOT/bin_v2/validator.sh
-source $PROJECT_ROOT/bin_v2/code.sh
+source $PROJECT_ROOT/gcp/util/common.sh
+source $PROJECT_ROOT/gcp/login.sh
+source $PROJECT_ROOT/gcp/validator.sh
+source $PROJECT_ROOT/gcp/hocon_cli.sh
+source $PROJECT_ROOT/gcp/validator.sh
+source $PROJECT_ROOT/gcp/code.sh
 
 function step_add() {
   local usage="$0 step_add \$cluster_id \$main_class \$chain \$s3_jar_path"
 
   local cluster_id=$1
   local main_class=$2
+  local class_name=`echo $main_class | rev | cut -d. -f1 | rev`
+  local lowercase_class_name=$(echo "$class_name" | tr '[:upper:]' '[:lower:]' | sed 's/\([A-Z]\)/_\L\1/g')
   local chain=$3
   local s3_jar_path=$4
 
@@ -48,25 +50,11 @@ function step_add() {
 
   local args=$(cat <<EOF
 [
---deploy-mode,cluster,
---driver-cores,$driver_cores,
---driver-memory,$driver_memory,
---num-executors,$executor_num,
---executor-cores,$executor_cores,
---executor-memory,$executor_memory,
---conf,spark.app.phase=$PHASE,
---conf,spark.app.chain=$chain,
---conf,spark.yarn.maxAppAttempts=1,
---conf,spark.driver.extraJavaOptions=-Dconfig.resource=$config_resource,
---conf,spark.executor.extraJavaOptions=-Dconfig.resource=$config_resource,
---properties-file,/etc/spark/conf/spark-defaults.conf,
---name,$spark_app_name,
-#CUSTOM_CONFIG#
---conf,spark.dynamicAllocation.enabled=false,
---conf,spark.serializer=org.apache.spark.serializer.KryoSerializer,
---conf,spark.kryoserializer.buffer.max=128m,
---class,$main_class,
-$s3_jar_path
+--spark.executor.memory=$driver_cores,
+--spark.driver.memory=$driver_memory,
+--spark.executor.instances=$executor_num,
+--spark.executor.cores=$executor_cores,
+--spark.executor.memory=$executor_memory,
 ]
 EOF)
 
@@ -81,8 +69,15 @@ EOF)
 
   log "spark-submit arguments: $args"
 
-  # https://docs.aws.amazon.com/cli/latest/reference/emr/add-steps.html
-  aws emr add-steps --cluster-id $cluster_id --steps Type=Spark,Name=$step_name,ActionOnFailure=CONTINUE,Args=$args
+  gcloud dataproc jobs submit spark \
+    --region=asia-northeast3 \
+    --cluster=$cluster_id \
+    --class=$main_class \
+    --jars=$s3_jar_path \
+    --properties=spark.app.phase=$PHASE,spark.app.chain=$chain,spark.yarn.maxAppAttempts=1,spark.driver.extraJavaOptions=-Dconfig.resource=$config_resource,spark.executor.extraJavaOptions=-Dconfig.resource=$config_resource,spark.dynamicAllocation.enabled=false,spark.serializer=org.apache.spark.serializer.KryoSerializer,spark.kryoserializer.buffer.max=128m,spark.executor.memory=$driver_cores,spark.driver.memory=$driver_memory,spark.executor.instances=$executor_num,spark.executor.cores=$executor_cores,spark.executor.memory=$executor_memory \
+    --region=asia-northeast3 \
+    --labels class_name=$lowercase_class_name,phase=$PHASE,nchain=$chain
+
 }
 
 if [[ "$RELEASE" == "" ]];then

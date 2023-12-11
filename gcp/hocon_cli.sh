@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
 SCRIPT_PATH=${BASH_SOURCE[0]}
-PROJECT_ROOT=$(cd $(dirname $(readlink ${SCRIPT_PATH} || echo ${SCRIPT_PATH}))/../;/bin/pwd)
-
-JAVA_CLASSPATH="${PROJECT_ROOT}/klaytn-cli.jar"
+PROJECT_ROOT=$(/bin/pwd)
+JAVA_CLASSPATH="${PROJECT_ROOT}/project-tool/cli/target/scala-2.12/klaytn-cli.jar"
 JAVA_CLASSPATH="$JAVA_CLASSPATH:${PROJECT_ROOT}/project-app/spark/src/main/scala"
 JAVA_CLASSPATH="$JAVA_CLASSPATH:${PROJECT_ROOT}/project-app/spark/src/main/resources"
 

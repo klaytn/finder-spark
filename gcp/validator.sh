@@ -3,9 +3,9 @@
 SCRIPT_PATH=${BASH_SOURCE[0]}
 PROJECT_ROOT=$(cd $(dirname $(readlink ${SCRIPT_PATH} || echo ${SCRIPT_PATH}))/../;/bin/pwd)
 
-source $PROJECT_ROOT/bin_v3/util/common.sh
-source $PROJECT_ROOT/bin_v3/cluster.sh
-source $PROJECT_ROOT/bin_v3/gcs.sh
+source $PROJECT_ROOT/gcp/util/common.sh
+source $PROJECT_ROOT/gcp/cluster.sh
+source $PROJECT_ROOT/gcp/gcs.sh
 
 function validator_validate_step_add() {
   local cluster_id=$1
