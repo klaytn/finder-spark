@@ -7,7 +7,7 @@ import org.apache.spark.streaming.kafka010.OffsetRange
 
 import scala.util.Try
 
-class S3OffsetManager {
+class GCSOffsetManager {
   def writeOffset(bucket: String,
                   key: String,
                   offsetRanges: Array[OffsetRange]): Unit = {
@@ -17,7 +17,6 @@ class S3OffsetManager {
         OffsetMeta(x.topic, x.partition, x.fromOffset, x.untilOffset)
       }
     val history = OffsetHistory(System.currentTimeMillis(), offsets)
-
     val json = JsonUtil.asJson(history)
     GCSUtil.writeText(bucket, key, json)
   }
@@ -28,10 +27,12 @@ class S3OffsetManager {
         Try(JsonUtil.fromJson[OffsetHistory](meta) match {
           case Some(history) =>
             history.offsets.map { meta =>
-              OffsetRange(meta.topic,
-                          meta.partition,
-                          meta.fromOffset,
-                          meta.untilOffset)
+              {
+                OffsetRange(meta.topic,
+                            meta.partition,
+                            meta.fromOffset,
+                            meta.untilOffset)
+              }
             }
           case None =>
             Array.empty[OffsetRange]

@@ -113,4 +113,13 @@ object GCSUtil {
         .build()
     )
   }
+
+  def download(bucket: String, key: String, localPath: String): Unit = {
+    val blobId = BlobId.of(bucket, key);
+    val path = java.nio.file.Paths.get(localPath);
+    val blob = storage.get(blobId);
+    if (blob != null) {
+      blob.downloadTo(path)
+    }
+  }
 }

@@ -23,6 +23,8 @@ object UserConfig {
   lazy val projectId: Try[String] = Try(
     Cfg.getString("spark.app.gcs.project.id"))
 
+  lazy val region: Try[String] = Try(Cfg.getString("spark.app.gcs.region"))
+
   lazy val baseBucket: String = Cfg.getString("spark.app.base.bucket")
 
   // streaming

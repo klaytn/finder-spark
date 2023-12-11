@@ -5,7 +5,8 @@ import io.klaytn.model._
 import io.klaytn.repository.{
   BlockRepository,
   EventLogRepository,
-  TransactionRepository
+  TransactionRepository,
+  InternalTransactionRepository
 }
 import io.klaytn.service.LoadDataInfileService
 import io.klaytn.utils.gcs.GCSUtil
@@ -13,6 +14,7 @@ import io.klaytn.utils.spark.UserConfig
 import io.klaytn.utils.{JsonUtil, SlackUtil}
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.exception.ExceptionUtils
+import java.io.{BufferedWriter, File, FileWriter}
 
 import java.text.SimpleDateFormat
 import java.util.TimeZone
@@ -28,6 +30,22 @@ class DefaultLoadDataInfileService extends LoadDataInfileService {
     val df = new SimpleDateFormat("yyyyMM")
     df.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"))
     df
+  }
+
+  def downloadTempFile(bucket: String, key: String): String = {
+    val tempFile = s"/tmp/${Random.nextInt(10000000)}-${key.split("/").last}"
+    GCSUtil.download(bucket, key, tempFile)
+    tempFile
+  }
+
+  def deleteTempFile(tempFile: String): Unit = {
+    new File(tempFile).delete()
+  }
+
+  def s3PathToTempFile(s3Path: String): String = {
+    val bucket = s3Path.split("/").head
+    val key = s3Path.split("/").tail.mkString("/")
+    downloadTempFile(bucket, key)
   }
 
   override def writeLoadData(jobBasePath: String,
@@ -284,9 +302,10 @@ class DefaultLoadDataInfileService extends LoadDataInfileService {
   }
 
   override def loadDataFromS3Block(s3Path: String): Unit = {
+    val localFile = s3PathToTempFile(s3Path)
     val sql =
-      s"""LOAD DATA FROM S3 's3://$s3Path'
-         |IGNORE INTO TABLE blocks
+      s"""LOAD DATA LOCAL INFILE '$localFile'
+         |IGNORE INTO TABLE ${BlockRepository.BlockTable}
          |FIELDS TERMINATED BY '$FieldDelim'
          |LINES TERMINATED BY '\n'
          |(@block_score,`extra_data`,`gas_used`,@governance_data,`hash`,`logs_bloom`,`number`,`parent_hash`,
@@ -298,13 +317,14 @@ class DefaultLoadDataInfileService extends LoadDataInfileService {
          |`proposer` = NULLIF(@proposer, 'NIL'),
          |`base_fee_per_gas` = NULLIF(@base_fee_per_gas, 'NIL')
          |""".stripMargin
-
     loadDataInfile(BlockRepository.BlockDB, sql)
+    deleteTempFile(localFile)
   }
 
   override def loadDataFromS3Transaction(s3Path: String): Unit = {
+    val localFile = s3PathToTempFile(s3Path)
     val sql =
-      s"""LOAD DATA FROM S3 's3://$s3Path'
+      s"""LOAD DATA LOCAL INFILE '$localFile'
          |IGNORE INTO TABLE ${TransactionRepository.TransactionTable}
          |FIELDS TERMINATED BY '$FieldDelim'
          |LINES TERMINATED BY '\n'
@@ -332,12 +352,14 @@ class DefaultLoadDataInfileService extends LoadDataInfileService {
          |""".stripMargin
 
     loadDataInfile(TransactionRepository.TransactionDB, sql)
+    deleteTempFile(localFile)
   }
 
   override def loadDataFromS3EventLog(s3Path: String): Unit = {
+    val localFile = s3PathToTempFile(s3Path)
     val sql =
-      s"""LOAD DATA FROM S3 's3://$s3Path'
-         |IGNORE INTO TABLE event_logs
+      s"""LOAD DATA LOCAL INFILE '$localFile'
+         |IGNORE INTO TABLE ${EventLogRepository.EventLogTable}
          |FIELDS TERMINATED BY '$FieldDelim'
          |LINES TERMINATED BY '\n'
          |(`address`,`block_hash`,`block_number`,`signature`,`data`,`log_index`,`topics`,`transaction_hash`,
@@ -347,13 +369,15 @@ class DefaultLoadDataInfileService extends LoadDataInfileService {
          |""".stripMargin
 
     loadDataInfile(EventLogRepository.EventLogDB, sql)
+    deleteTempFile(localFile)
   }
 
   override def loadDataFromS3InternalTransaction(s3Path: String,
                                                  dbName: String): Unit = {
+    val localFile = s3PathToTempFile(s3Path)
     val sql =
-      s"""LOAD DATA FROM S3 's3://$s3Path'
-         |IGNORE INTO TABLE internal_transactions
+      s"""LOAD DATA LOCAL INFILE '$localFile'
+         |IGNORE INTO TABLE ${InternalTransactionRepository.InternalTXTable}
          |FIELDS TERMINATED BY '$FieldDelim'
          |LINES TERMINATED BY '\n'
          |(`block_number`,`call_id`,@error,@from,`gas`,@gas_used,`transaction_index`,
@@ -372,18 +396,21 @@ class DefaultLoadDataInfileService extends LoadDataInfileService {
          |""".stripMargin
 
     loadDataInfile(dbName, sql)
+    deleteTempFile(localFile)
   }
 
   override def loadDataFromS3InternalTransactionIndex(s3Path: String,
                                                       dbName: String): Unit = {
+    val localFile = s3PathToTempFile(s3Path)
     val sql =
-      s"""LOAD DATA FROM S3 's3://$s3Path'
-         |IGNORE INTO TABLE internal_transaction_index
+      s"""LOAD DATA LOCAL INFILE '$localFile'
+         |IGNORE INTO TABLE  ${InternalTransactionRepository.InternalTXIndexTable}
          |FIELDS TERMINATED BY '$FieldDelim'
          |LINES TERMINATED BY '\n'
          |(`internal_tx_id`,`account_address`,`block_number`,`transaction_index`,`call_id`)
          |""".stripMargin
 
     loadDataInfile(dbName, sql)
+    deleteTempFile(localFile)
   }
 }
