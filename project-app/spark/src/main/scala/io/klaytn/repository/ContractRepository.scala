@@ -29,7 +29,7 @@ abstract class ContractRepository extends AbstractRepository {
     withDB(ContractDB) { c =>
       val pstmt = c.prepareStatement(
         s"INSERT INTO $ContractTable (`contract_address`,`contract_type`,`name`,`symbol`,`decimal`,`total_supply`,`tx_error`,`total_supply_order`,`total_transfer`,`created_at`)" +
-          " VALUES (?,?,?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE `contract_type`=?,`name`=?,`symbol`=?,`decimal`=?,`total_supply`=?,`total_supply_order`=?,`total_transfer`=`total_transfer`+?,`created_at`=?,`tx_error`=?")
+          " VALUES (?,?,?,?,?,?,?,?,?, IFNULL(?, NOW()) ) ON DUPLICATE KEY UPDATE `contract_type`=?,`name`=?,`symbol`=?,`decimal`=?,`total_supply`=?,`total_supply_order`=?,`total_transfer`=`total_transfer`+?,`created_at`=IFNULL(?, NOW()),`tx_error`=?")
 
       val name = contract.name.getOrElse("")
       val symbol = contract.symbol.getOrElse("")
@@ -71,6 +71,9 @@ abstract class ContractRepository extends AbstractRepository {
                                    |symbol: $symbol
                                    |decimal: $decimal
                                    |totalSupply: $totalSupply
+                                   |totalSupplyOrder: $totalSupplyOrder
+                                   |timestamp: ${sdf.format(createdTimestamp)}
+                                   |createdTimestamp: $createdTimestamp
                                    |${e.getMessage}
                                    |${StringUtils.abbreviate(
                                      ExceptionUtils.getStackTrace(e),

@@ -301,7 +301,7 @@ abstract class BlockRepository extends AbstractRepository {
   def insertBlockBurns(burns: Seq[BlockBurns]): Unit = {
     withDB(BlockBurnsDB) { c =>
       val pstmt = c.prepareStatement(
-        s"INSERT INTO $BlockBurnTable (`number`,`fees`,`accumulate_fees`,`accumulate_klay`,`timestamp`) VALUES (?,?,?,?,?)")
+        s"INSERT IGNORE  INTO $BlockBurnTable (`number`,`fees`,`accumulate_fees`,`accumulate_klay`,`timestamp`) VALUES (?,?,?,?,?)")
 
       burns.sortBy(_.number).foreach { burn =>
         pstmt.setLong(1, burn.number)

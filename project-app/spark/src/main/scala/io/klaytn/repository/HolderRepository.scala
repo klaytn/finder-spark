@@ -49,7 +49,7 @@ abstract class HolderRepository(
   def insertNFTPatternedUri(contractAddress: String, tokenUri: String): Unit = {
     withDB(NFTHolderDB) { c =>
       val pstmt = c.prepareStatement(
-        s"INSERT INTO $NFTPatternedUriTable (`contract_address`,`token_uri`) VALUES (?,?)")
+        s"INSERT IGNORE INTO $NFTPatternedUriTable (`contract_address`,`token_uri`) VALUES (?,?)")
 
       pstmt.setString(1, contractAddress)
       pstmt.setString(2, tokenUri)
@@ -625,7 +625,7 @@ abstract class HolderRepository(
     if (insert.nonEmpty) {
       withDB(NFTHolderDB) { c =>
         val pstmtInsHolders = c.prepareStatement(
-          s"INSERT INTO $NFTHoldersTable (`contract_address`,`holder_address`,`token_count`,`last_transaction_time`)" +
+          s"INSERT IGNORE INTO $NFTHoldersTable (`contract_address`,`holder_address`,`token_count`,`last_transaction_time`)" +
             " VALUES (?,?,?,?)"
         )
         insert.foreach(
@@ -729,7 +729,6 @@ abstract class HolderRepository(
                 .getOrElse(BigInt(0))
             } catch { case _: Throwable => }
           }
-//
           if (amount <= 0) delete.append(t)
           else {
             val ts = Math.max(lastTransactionTime, t.timestamp)

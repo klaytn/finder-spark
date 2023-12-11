@@ -48,6 +48,7 @@ package object db {
         dbConf.addDataSourceProperty(
           "prepStmtCacheSqlLimit",
           Cfg.getString("spark.app.mysql.prepStmtCacheSqlLimit"))
+        dbConf.addDataSourceProperty("allowLoadLocalInfile", "true")
         dbConf.setMinimumIdle(Cfg.getInt("spark.app.mysql.minimumIdle"))
         dbConf.setMaximumPoolSize(Cfg.getInt("spark.app.mysql.maximumPoolSize"))
         dbConf.setConnectionTimeout(
