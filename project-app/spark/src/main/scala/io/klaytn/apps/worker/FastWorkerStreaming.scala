@@ -125,7 +125,7 @@ object FastWorkerStreaming extends KafkaStreamingHelper {
               tokenHolder()
               val s2 = System.currentTimeMillis()
               if (s2 - s1 > 3000) {
-                // SlackUtil.sendMessage(s"FastWorker#1: ${s2 - s1}")
+                SlackUtil.sendMessage(s"FastWorker#1: ${s2 - s1}")
               }
             case 2 =>
               val s1 = System.currentTimeMillis()

@@ -7,7 +7,7 @@ import io.klaytn.utils.spark.{KafkaStreamingHelper, UserConfig}
 import io.klaytn.apps.worker.WorkerMockReceiver
 import org.apache.spark.TaskContext
 
-object TokenURI extends KafkaStreamingHelper {
+object BlockBurn extends KafkaStreamingHelper {
   import BlockBurnDeps._
 
   def blockBurnFee(): Unit = {
@@ -15,8 +15,9 @@ object TokenURI extends KafkaStreamingHelper {
   }
 
   override def run(args: Array[String]): Unit = {
-    0L to 139632634L foreach { x =>
-      blockBurnFee()
+
+    140792004L to 140800000L foreach { number =>
+      blockService.saveBlockRewardToMysql(number)
     }
   }
 }

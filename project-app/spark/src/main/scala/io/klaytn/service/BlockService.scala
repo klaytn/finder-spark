@@ -558,7 +558,7 @@ class BlockService(blockPersistentAPI: LazyEval[BlockPersistentAPI],
     }
 
     def insertTransactions(): Future[Unit] = Future {
-      if (refinedTransactionReceipts.length < 300) {
+      if (refinedTransactionReceipts.length < 1000) {
         this.saveTransactionReceiptsToMysql(refinedTransactionReceipts)
       } else {
         val transactionLines =
