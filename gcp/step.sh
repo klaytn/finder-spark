@@ -74,7 +74,7 @@ EOF)
     --cluster=$cluster_id \
     --class=$main_class \
     --jars=$s3_jar_path \
-    --properties=spark.app.phase=$PHASE,spark.app.chain=$chain,spark.yarn.maxAppAttempts=1,spark.driver.extraJavaOptions=-Dconfig.resource=$config_resource,spark.executor.extraJavaOptions=-Dconfig.resource=$config_resource,spark.dynamicAllocation.enabled=false,spark.serializer=org.apache.spark.serializer.KryoSerializer,spark.kryoserializer.buffer.max=128m,spark.executor.memory=$driver_cores,spark.driver.memory=$driver_memory,spark.executor.instances=$executor_num,spark.executor.cores=$executor_cores,spark.executor.memory=$executor_memory \
+    --properties=spark.app.phase=$PHASE,spark.app.chain=$chain,spark.yarn.maxAppAttempts=1,spark.driver.extraJavaOptions=-Dconfig.resource=$config_resource,spark.executor.extraJavaOptions=-Dconfig.resource=$config_resource,spark.dynamicAllocation.enabled=true,spark.serializer=org.apache.spark.serializer.KryoSerializer,spark.kryoserializer.buffer.max=128m,spark.executor.memory=$driver_cores,spark.driver.memory=$driver_memory,spark.executor.instances=$executor_num,spark.executor.cores=$executor_cores,spark.executor.memory=$executor_memory \
     --region=asia-northeast3 \
     --labels class_name=$lowercase_class_name,phase=$PHASE,nchain=$chain
 
