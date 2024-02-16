@@ -49,7 +49,7 @@ abstract class HolderRepository(
   def insertNFTPatternedUri(contractAddress: String, tokenUri: String): Unit = {
     withDB(NFTHolderDB) { c =>
       val pstmt = c.prepareStatement(
-        s"INSERT INTO $NFTPatternedUriTable (`contract_address`,`token_uri`) VALUES (?,?)")
+        s"INSERT IGNORE INTO $NFTPatternedUriTable (`contract_address`,`token_uri`) VALUES (?,?)")
 
       pstmt.setString(1, contractAddress)
       pstmt.setString(2, tokenUri)
@@ -456,7 +456,7 @@ abstract class HolderRepository(
 
     updatedIds.foreach(id => FinderRedis.del(s"cache/token-holder::$id"))
 
-//    io.klaytn.utils.s3.S3Util
+//    io.klaytn.utils.gcs.GCSUtil
 //      .writeText(UserConfig.baseBucket, s"output/holder/${System.currentTimeMillis()}", msg.mkString("\n"))
   }
 
@@ -522,7 +522,7 @@ abstract class HolderRepository(
   }
 
 //  private def s3logging(contract: String, holder: String, blockNumber: Long, path: String, msg: String): Unit = {
-//    S3Util.writeText(UserConfig.baseBucket,
+//    GCSUtil.writeText(UserConfig.baseBucket,
 //                     s"log/${UserConfig.chainPhase}/${blockNumber / 10000}/$contract/$holder/$path",
 //                     msg)
 //  }
@@ -625,7 +625,7 @@ abstract class HolderRepository(
     if (insert.nonEmpty) {
       withDB(NFTHolderDB) { c =>
         val pstmtInsHolders = c.prepareStatement(
-          s"INSERT INTO $NFTHoldersTable (`contract_address`,`holder_address`,`token_count`,`last_transaction_time`)" +
+          s"INSERT IGNORE INTO $NFTHoldersTable (`contract_address`,`holder_address`,`token_count`,`last_transaction_time`)" +
             " VALUES (?,?,?,?)"
         )
         insert.foreach(
@@ -729,7 +729,6 @@ abstract class HolderRepository(
                 .getOrElse(BigInt(0))
             } catch { case _: Throwable => }
           }
-//
           if (amount <= 0) delete.append(t)
           else {
             val ts = Math.max(lastTransactionTime, t.timestamp)

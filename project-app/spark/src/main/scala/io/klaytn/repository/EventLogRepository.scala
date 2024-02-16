@@ -16,7 +16,7 @@ abstract class EventLogRepository extends AbstractRepository {
   def insertEventLogs(eventLogs: Seq[RefinedEventLog]): Unit = {
     withDB(EventLogDB) { c =>
       val pstmt = c.prepareStatement(
-        s"INSERT INTO $EventLogTable (`address`,`block_hash`,`block_number`,`signature`,`data`,`log_index`,`topics`," +
+        s"INSERT IGNORE INTO $EventLogTable (`address`,`block_hash`,`block_number`,`signature`,`data`,`log_index`,`topics`," +
           "`transaction_hash`,`transaction_index`,`removed`) VALUES (?,?,?,?,?,?,?,?,?,?)"
       )
 
@@ -56,7 +56,7 @@ abstract class EventLogRepository extends AbstractRepository {
     val eventLogs = scala.collection.mutable.ListBuffer.empty[RefinedEventLog]
     withDB(EventLogDB) { c =>
       val pstmt = c.prepareStatement(
-        s"""SELECT el.block_number, el.block_hash, el.transaction_hash, el.transaction_index, tx.status, el.address, el.topics, el.data, el.log_index, tx.timestamp, el.removed FROM 
+        s"""SELECT el.block_number, el.block_hash, el.transaction_hash, el.transaction_index, tx.status, el.address, el.topics, el.data, el.log_index, tx.timestamp, el.removed FROM
         $EventLogTable el JOIN ${TransactionRepository.TransactionTable} tx ON tx.transaction_hash = el.transaction_hash
           WHERE tx.block_number BETWEEN ? AND ?
           ORDER BY tx.block_number ASC;

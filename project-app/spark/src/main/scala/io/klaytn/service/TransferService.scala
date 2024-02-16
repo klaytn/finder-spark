@@ -313,7 +313,7 @@ class TransferService(transferPersistentAPI: LazyEval[TransferPersistentAPI],
 
   def procApprove(eventLogs: Seq[RefinedEventLog]): Unit = {
     if (!FunctionSupport.approve(UserConfig.chainPhase)) return
-//    S3Util.writeText("klaytn-prod-spark", s"output/transfer/${eventLogs.map(_.blockNumber).min}", "")
+//    GCSUtil.writeText("klaytn-prod-spark", s"output/transfer/${eventLogs.map(_.blockNumber).min}", "")
 
     // Map[(owner, spender, contractType, contractAddress), (blockNumber, txHash, amount, timestamp)]
     val resultToken =

@@ -20,7 +20,7 @@ object InternalTXLoadData extends SparkHelper with BulkLoadHelper {
 
   def loadData(bnp: Int): Unit = {
     val rdd = sc.textFile(
-      s"s3a://${outputDirPrefix()}/loadDataFromS3/list/trace/$bnp/part*")
+      s"gs://${outputDirPrefix()}/loadDataFromS3/list/trace/$bnp/part*")
     rdd
       .coalesce(1)
       .map { line =>
@@ -74,10 +74,10 @@ object InternalTXLoadData extends SparkHelper with BulkLoadHelper {
 
   // Combine small data and load it all at once
   def _makeMergeDataAndLoad(bnp: Int): Unit = {
-    sc.textFile(s"s3a://${outputDirPrefix()}/loadDataFromS3/trace/$bnp/finder*")
+    sc.textFile(s"gs://${outputDirPrefix()}/loadDataFromS3/trace/$bnp/finder*")
       .repartition(1)
       .saveAsTextFile(
-        s"s3a://${outputDirPrefix()}/loadDataFromS3/trace_merge/$bnp")
+        s"gs://${outputDirPrefix()}/loadDataFromS3/trace_merge/$bnp")
 
     loadDataInfileService
       .loadDataFromS3InternalTransaction(
@@ -85,10 +85,10 @@ object InternalTXLoadData extends SparkHelper with BulkLoadHelper {
         "finder0201")
 
     sc.textFile(
-        s"s3a://${outputDirPrefix()}/loadDataFromS3/trace_index/$bnp/finder*")
+        s"gs://${outputDirPrefix()}/loadDataFromS3/trace_index/$bnp/finder*")
       .repartition(1)
       .saveAsTextFile(
-        s"s3a://${outputDirPrefix()}/loadDataFromS3/trace_index_merge/$bnp")
+        s"gs://${outputDirPrefix()}/loadDataFromS3/trace_index_merge/$bnp")
     loadDataInfileService
       .loadDataFromS3InternalTransactionIndex(
         s"${outputDirPrefix()}/loadDataFromS3/trace_index_merge/$bnp/part-00000",

@@ -12,7 +12,7 @@ object RefineKafkaLogBatch extends SparkHelper {
       862 to 1083 foreach { bnp =>
         val bBnp = sc.broadcast(bnp)
         val originLogPath =
-          s"s3a://${UserConfig.logStorageS3Path}/klaytn/label=kafka_log/topic=$topic/bnp=$bnp/*.gz"
+          s"gs://${UserConfig.logStorageS3Path}/klaytn/label=kafka_log/topic=$topic/bnp=$bnp/*.gz"
         val blockRDD = sc
           .textFile(s"$originLogPath", 150)
           .flatMap { line =>
@@ -77,7 +77,7 @@ object RefineKafkaLogBatch extends SparkHelper {
           .option("compression", "gzip")
           .partitionBy("bnp")
           .text(
-            s"s3a://${UserConfig.logStorageS3Path}/klaytn/label=kafka_log/topic=$topic/")
+            s"gs://${UserConfig.logStorageS3Path}/klaytn/label=kafka_log/topic=$topic/")
       }
     }
   }

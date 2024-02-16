@@ -1,9 +1,0 @@
-include classpath("prod/all.cypress.conf")
-
-spark.driver.cores=1
-spark.driver.memory=2g
-spark.executor.instances=8
-spark.executor.cores=1
-spark.executor.memory=2g
-
-spark.app.log.storage.s3.path = "ENV_S3_LAKE_BUCKET_NAME"

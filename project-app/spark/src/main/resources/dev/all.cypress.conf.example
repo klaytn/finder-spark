@@ -1,7 +1,0 @@
-include classpath("dev/cypress/db.conf")
-include classpath("dev/cypress/redis.conf")
-include classpath("dev/cypress/kafka.conf")
-include classpath("dev/cypress/caver.conf")
-
-spark.app.base.bucket = "ENV_S3_BUCKET_NAME"
-spark.app.slack.url=ENV_SLACK_WEBHOOK_URL

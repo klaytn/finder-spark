@@ -21,7 +21,7 @@ object AccountMakeData extends SparkHelper with BulkLoadHelper {
   def step1(start: Int, end: Int): Unit = {
     start to end foreach { bnp =>
       val rdd = sc
-        .textFile(s"s3a://${kafkaLogDirPrefix()}/topic=block/bnp=$bnp/*.gz")
+        .textFile(s"gs://${kafkaLogDirPrefix()}/topic=block/bnp=$bnp/*.gz")
         .flatMap(Block.parse)
       if (!rdd.isEmpty()) {
         accountService
@@ -31,14 +31,14 @@ object AccountMakeData extends SparkHelper with BulkLoadHelper {
               s"$address\t$typ\t$txCount"
           }
           .repartition(32)
-          .saveAsTextFile(s"s3a://${outputDirPrefix()}/AccountBatch/$bnp")
+          .saveAsTextFile(s"gs://${outputDirPrefix()}/AccountBatch/$bnp")
       }
     }
   }
 
   def step2(start: Int, end: Int): Unit = {
     val paths = start to end map (bnp =>
-      s"s3a://${outputDirPrefix()}/AccountBatch/$bnp/part*")
+      s"gs://${outputDirPrefix()}/AccountBatch/$bnp/part*")
     val rdd = sc.textFile(paths.mkString(","))
     rdd
       .repartition(256)
@@ -77,13 +77,13 @@ object AccountMakeData extends SparkHelper with BulkLoadHelper {
       .repartition(256)
       .map(x => s"${x._1}\t${x._2}\t${x._3}")
       .saveAsTextFile(
-        s"s3a://${outputDirPrefix()}/AccountBatch/summary_${start}_$end/total")
+        s"gs://${outputDirPrefix()}/AccountBatch/summary_${start}_$end/total")
   }
 
   def step3(start: Int, end: Int): Unit = {
     val rdd = sc
       .textFile(
-        s"s3a://${outputDirPrefix()}/AccountBatch/summary_${start}_$end/total/part*")
+        s"gs://${outputDirPrefix()}/AccountBatch/summary_${start}_$end/total/part*")
       .map { line =>
         val s = line.split("\t")
         (s(0), s(1), s(2).toInt)
@@ -94,18 +94,18 @@ object AccountMakeData extends SparkHelper with BulkLoadHelper {
       .map(x => s"${x._1}\t${x._2}\t${x._3}")
       .repartition(256)
       .saveAsTextFile(
-        s"s3a://${outputDirPrefix()}/AccountBatch/summary_${start}_$end/total_eoa")
+        s"gs://${outputDirPrefix()}/AccountBatch/summary_${start}_$end/total_eoa")
     rdd
       .filter(_._2 != "EOA")
       .map(x => s"${x._1}\t${x._2}\t${x._3}")
       .repartition(256)
       .saveAsTextFile(
-        s"s3a://${outputDirPrefix()}/AccountBatch/summary_${start}_$end/total_sca")
+        s"gs://${outputDirPrefix()}/AccountBatch/summary_${start}_$end/total_sca")
   }
 
   def step4(start: Int, end: Int): Unit = {
     sc.textFile(
-        s"s3a://${outputDirPrefix()}/AccountBatch/summary_${start}_$end/total_eoa/part*")
+        s"gs://${outputDirPrefix()}/AccountBatch/summary_${start}_$end/total_eoa/part*")
       .map { line =>
         val s = line.split("\t")
         val (address, _, _) = (s(0), s(1), s(2).toInt)
@@ -114,12 +114,12 @@ object AccountMakeData extends SparkHelper with BulkLoadHelper {
       }
       .repartition(1024)
       .saveAsTextFile(
-        s"s3a://${outputDirPrefix()}/AccountBatch/summary_${start}_$end/total_eoa_db")
+        s"gs://${outputDirPrefix()}/AccountBatch/summary_${start}_$end/total_eoa_db")
   }
 
   def step5(start: Int, end: Int): Unit = {
     sc.textFile(
-        s"s3a://${outputDirPrefix()}/AccountBatch/summary_${start}_$end/total_sca/part*")
+        s"gs://${outputDirPrefix()}/AccountBatch/summary_${start}_$end/total_sca/part*")
       .map { line =>
         val s = line.split("\t")
         val (address, inputData, _) = (s(0), s(1), s(2).toInt)
@@ -146,13 +146,13 @@ object AccountMakeData extends SparkHelper with BulkLoadHelper {
           .get("from")}\t${m.get("txHash")}\t${m.get("tx_error")}"
       }
       .saveAsTextFile(
-        s"s3a://${outputDirPrefix()}/AccountBatch/summary_${start}_$end/total_sca_raw_data")
+        s"gs://${outputDirPrefix()}/AccountBatch/summary_${start}_$end/total_sca_raw_data")
   }
 
   def step6(start: Int, end: Int): Unit = {
     val rdd =
       sc.textFile(
-        s"s3a://${outputDirPrefix()}/AccountBatch/summary_${start}_$end/total_sca_raw_data/part*")
+        s"gs://${outputDirPrefix()}/AccountBatch/summary_${start}_$end/total_sca_raw_data/part*")
     rdd
       .flatMap { line =>
         val r =
@@ -182,7 +182,7 @@ object AccountMakeData extends SparkHelper with BulkLoadHelper {
       }
       .repartition(32)
       .saveAsTextFile(
-        s"s3a://${outputDirPrefix()}/AccountBatch/summary_${start}_$end/total_sca_db_contracts")
+        s"gs://${outputDirPrefix()}/AccountBatch/summary_${start}_$end/total_sca_db_contracts")
 
     rdd
       .flatMap { line =>
@@ -213,7 +213,7 @@ object AccountMakeData extends SparkHelper with BulkLoadHelper {
       }
       .repartition(32)
       .saveAsTextFile(
-        s"s3a://${outputDirPrefix()}/AccountBatch/summary_${start}_$end/total_sca_db_accounts")
+        s"gs://${outputDirPrefix()}/AccountBatch/summary_${start}_$end/total_sca_db_accounts")
   }
 
   override def run(args: Array[String]): Unit = {

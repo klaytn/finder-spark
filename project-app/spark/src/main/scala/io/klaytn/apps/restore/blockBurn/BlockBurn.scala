@@ -15,8 +15,9 @@ object BlockBurn extends KafkaStreamingHelper {
   }
 
   override def run(args: Array[String]): Unit = {
-    0L to 126000000L foreach { x =>
-      blockBurnFee()
+
+    140792004L to 140800000L foreach { number =>
+      blockService.saveBlockRewardToMysql(number)
     }
   }
 }

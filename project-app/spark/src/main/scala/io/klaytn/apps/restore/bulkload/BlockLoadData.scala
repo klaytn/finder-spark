@@ -17,7 +17,7 @@ object BlockLoadData extends SparkHelper with BulkLoadHelper {
 
   def loadData(bnp: Int): Unit = {
     val rdd = sc.textFile(
-      s"s3a://${outputDirPrefix()}/loadDataFromS3/list/block/$bnp/part*")
+      s"gs://${outputDirPrefix()}/loadDataFromS3/list/block/$bnp/part*")
 
     rdd.repartition(8).foreach { filename =>
       val bucket = outputBucket()
@@ -34,7 +34,7 @@ object BlockLoadData extends SparkHelper with BulkLoadHelper {
 
   def loadEventLogData(bnp: Int): Unit = {
     val rdd = sc.textFile(
-      s"s3a://${outputDirPrefix()}/loadDataFromS3/list/block/$bnp/part*")
+      s"gs://${outputDirPrefix()}/loadDataFromS3/list/block/$bnp/part*")
 
     rdd.repartition(8).foreach { filename =>
       val bucket = outputBucket()

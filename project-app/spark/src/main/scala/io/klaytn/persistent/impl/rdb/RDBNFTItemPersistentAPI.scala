@@ -11,7 +11,7 @@ class RDBNFTItemPersistentAPI
     super.insert(nftItem)
 //    } catch {
 //      case e: Throwable =>
-//        S3Util.writeText(
+//        GCSUtil.writeText(
 //          "klaytn-prod-spark",
 //          s"output/fastworker/nftitems/${System.currentTimeMillis()}.step3.${nftItem}",
 //          e.getStackTraceString

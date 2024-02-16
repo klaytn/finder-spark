@@ -20,6 +20,11 @@ object UserConfig {
   lazy val s3SecretKey: Try[String] = Try(
     Cfg.getString("spark.app.s3a.secret.key"))
 
+  lazy val projectId: Try[String] = Try(
+    Cfg.getString("spark.app.gcs.project.id"))
+
+  lazy val region: Try[String] = Try(Cfg.getString("spark.app.gcs.region"))
+
   lazy val baseBucket: String = Cfg.getString("spark.app.base.bucket")
 
   // streaming

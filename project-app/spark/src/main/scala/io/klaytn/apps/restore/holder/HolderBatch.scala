@@ -30,7 +30,7 @@ object HolderBatch extends SparkHelper with BulkLoadHelper {
 
   def tokenHolder(bnp: Int, noPartition: Int): Unit = {
     val rdd =
-      sc.textFile(s"s3a://${kafkaLogDirPrefix()}/topic=block/bnp=$bnp/*.gz")
+      sc.textFile(s"gs://${kafkaLogDirPrefix()}/topic=block/bnp=$bnp/*.gz")
     if (!rdd.isEmpty()) {
       rdd
         .flatMap { line =>
@@ -101,7 +101,7 @@ object HolderBatch extends SparkHelper with BulkLoadHelper {
 
   def nftHolder(bnp: Int, noPartition: Int): Unit = {
     val rdd =
-      sc.textFile(s"s3a://${kafkaLogDirPrefix()}/topic=block/bnp=$bnp/*.gz")
+      sc.textFile(s"gs://${kafkaLogDirPrefix()}/topic=block/bnp=$bnp/*.gz")
     if (!rdd.isEmpty()) {
       rdd
         .flatMap { line =>
@@ -264,7 +264,7 @@ object HolderBatch extends SparkHelper with BulkLoadHelper {
 
   def nftInventories(bnp: Int, noPartition: Int): Unit = {
     val rdd =
-      sc.textFile(s"s3a://${kafkaLogDirPrefix()}/topic=block/bnp=$bnp/*.gz")
+      sc.textFile(s"gs://${kafkaLogDirPrefix()}/topic=block/bnp=$bnp/*.gz")
     if (!rdd.isEmpty()) {
       rdd
         .flatMap { line =>
@@ -392,7 +392,7 @@ object HolderBatch extends SparkHelper with BulkLoadHelper {
 
   def nftHolderAndInventoriesByDB(): Unit = {
     val phase = "baobab"
-    sc.textFile(s"s3a://${kafkaLogDirPrefix()}/output/nft_transfers/$phase/*")
+    sc.textFile(s"gs://${kafkaLogDirPrefix()}/output/nft_transfers/$phase/*")
       .flatMap { line =>
         val s = line.split("\t")
         val (id,

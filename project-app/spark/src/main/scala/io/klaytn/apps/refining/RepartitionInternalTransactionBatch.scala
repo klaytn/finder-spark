@@ -11,7 +11,7 @@ object RepartitionInternalTransactionBatch extends SparkHelper {
     700 to 804 foreach { bnp =>
       val traceRDD = sc
         .textFile(
-          s"s3a://${UserConfig.logStorageS3Path}/klaytn/label=kafka_log/topic=trace/bnp=$bnp/*.gz")
+          s"gs://${UserConfig.logStorageS3Path}/klaytn/label=kafka_log/topic=trace/bnp=$bnp/*.gz")
         .repartition(200)
         .flatMap { line =>
           InternalTransaction.parse(line) match {
@@ -46,7 +46,7 @@ object RepartitionInternalTransactionBatch extends SparkHelper {
         .write
         .mode(SaveMode.Append)
         .partitionBy("label", "bnp")
-        .parquet(s"""s3a://${UserConfig.logStorageS3Path}/klaytn/""")
+        .parquet(s"""gs://${UserConfig.logStorageS3Path}/klaytn/""")
 
       internalTransactionDS
         .where(col("from").isNotNull)
@@ -56,7 +56,7 @@ object RepartitionInternalTransactionBatch extends SparkHelper {
         .write
         .mode(SaveMode.Append)
         .partitionBy("label", "fp")
-        .parquet(s"""s3a://${UserConfig.logStorageS3Path}/klaytn/""")
+        .parquet(s"""gs://${UserConfig.logStorageS3Path}/klaytn/""")
 
       internalTransactionDS
         .where(col("from").isNotNull)
@@ -66,7 +66,7 @@ object RepartitionInternalTransactionBatch extends SparkHelper {
         .write
         .mode(SaveMode.Append)
         .partitionBy("label", "tp")
-        .parquet(s"""s3a://${UserConfig.logStorageS3Path}/klaytn/""")
+        .parquet(s"""gs://${UserConfig.logStorageS3Path}/klaytn/""")
 
       //    internalTransactionDS
       //      .where(col("from").isNotNull)

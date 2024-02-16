@@ -26,7 +26,7 @@ object CheckPartitionBatch extends SparkHelper {
 
   def a(): Unit = {
     val sourceDataPath: String =
-      "s3a://klaytn-prod-lake/klaytn/label=internal_transactions/"
+      "gs://klaytn-prod-lake/klaytn/label=internal_transactions/"
     val df = spark.read.parquet(sourceDataPath)
     val res = df
       .select(col("from"), col("to"))
@@ -78,7 +78,7 @@ object CheckPartitionBatch extends SparkHelper {
 
   def b(): Unit = {
     val sourceDataPath: String =
-      "s3a://klaytn-prod-lake/klaytn/label=internal_transactions/"
+      "gs://klaytn-prod-lake/klaytn/label=internal_transactions/"
     val df = spark.read.parquet(sourceDataPath)
     val res = df
       .select(col("from"), col("to"))

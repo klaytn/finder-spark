@@ -1,7 +1,7 @@
 package io.klaytn.utils.spark
 
 import io.klaytn.utils.SlackUtil
-import io.klaytn.utils.s3.S3Util
+import io.klaytn.utils.gcs.GCSUtil
 import org.apache.spark.streaming.{Duration, StreamingContext}
 
 trait StreamingHelper extends SparkHelper {
@@ -15,7 +15,7 @@ trait StreamingHelper extends SparkHelper {
 
   private def shutdownMonitor(): Unit = {
     val content = s"AppID: ${sc.applicationId}"
-    S3Util.writeText(UserConfig.baseBucket, stopFlagKey(), content)
+    GCSUtil.writeText(UserConfig.baseBucket, stopFlagKey(), content)
 
     val monitorIntervalMs = 5000
     var stop: Boolean = false
@@ -26,7 +26,7 @@ trait StreamingHelper extends SparkHelper {
         SlackUtil.sendMessage(s"[$jobName] The streaming context is stopped...")
       }
 
-      if (!stop && !S3Util.exist(UserConfig.baseBucket, stopFlagKey())) {
+      if (!stop && !GCSUtil.exist(UserConfig.baseBucket, stopFlagKey())) {
         SlackUtil.sendMessage(s"[$jobName] Start to stop gracefully...")
         ssc.stop(true, true)
         SlackUtil.sendMessage(s"[$jobName] Success to stop gracefully...")

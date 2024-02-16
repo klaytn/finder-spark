@@ -53,7 +53,7 @@ object FindOffsetITX extends KafkaStreamingHelper {
           }
           .repartition(1)
           .saveAsTextFile(
-            s"s3a://klaytn-spark-job/output/itx_offset/${System.currentTimeMillis()}")
+            s"gs://klaytn-spark-job/output/itx_offset/${System.currentTimeMillis()}")
       }
 
       writeOffsetAndClearCache(rdd)

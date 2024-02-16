@@ -13,6 +13,9 @@ object LoadDataInfileService {
 }
 
 trait LoadDataInfileService {
+  def downloadTempFile(bucket: String, key: String): String
+  def deleteTempFile(tempFile: String): Unit
+  def s3PathToTempFile(s3Path: String): String
   def writeLoadData(jobBasePath: String,
                     typ: String,
                     blockNumber: Long,
