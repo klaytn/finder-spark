@@ -21,4 +21,13 @@ class RDBTransactionPersistentAPI
   override def insertTransactionReceipts(block: Block): Unit = {
     this.insertTransactionReceipts(block.toRefined._2)
   }
+
+  override def getMismatchingBlocks(startNum: Long,
+                                    endNum: Long): List[Long] = {
+    super.getMismatchingBlocks(startNum, endNum)
+  }
+
+  override def getMissingBlocks(startNum: Long, endNum: Long): List[Long] = {
+    super.getMissingBlocks(startNum, endNum)
+  }
 }

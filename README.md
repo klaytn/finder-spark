@@ -153,6 +153,9 @@ You can find the file in the following path.
 ./release.sh finder-batch-prod io.klaytn.apps.restore.blockBurn.BlockBurn baobab --build
 ./release.sh finder-batch-prod io.klaytn.apps.restore.blockBurn.BlockBurn cypress --build
 
+./release.sh finder-batch-prod io.klaytn.apps.restore.transaction.TransactionRestoreBatch cypress --build
+./release.sh finder-batch-prod io.klaytn.apps.restore.transaction.TransactionRestoreBatch baobab --build
+
 ## Deploy Streaming Examples
 
 ./release.sh finder-streaming-prod io.klaytn.apps.block.BlockToDBStreaming cypress --build
@@ -181,17 +184,3 @@ You can find the file in the following path.
 
 ./release.sh finder-streaming-prod io.klaytn.apps.itx.DumpKafkaInternalTX cypress --build
 ./release.sh finder-streaming-prod io.klaytn.apps.itx.DumpKafkaInternalTX baobab --build
-
-
-
-spark:app:prod-cypress:HolderService:NFT:LastBlock
-132636685
-
-spark:app:prod-cypress:HolderService:NFT:TokenURI:LastBlock
-0
-
-spark:app:prod-cypress:HolderService:Token:LastBlock
-785874903
-
-spark:app:prod-cypress:HolderService:TokenBurn:LastBlock
-584969283
