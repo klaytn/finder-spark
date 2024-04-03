@@ -8,7 +8,7 @@ import io.klaytn.model.{Block, RefinedBlock, RefinedEventLog}
 import io.klaytn.persistent.AccountPersistentAPI
 import io.klaytn.utils._
 import io.klaytn.utils.klaytn.NumberConverter._
-import io.klaytn.utils.s3.S3Util
+import io.klaytn.utils.gcs.GCSUtil
 import io.klaytn.utils.spark.UserConfig
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.exception.ExceptionUtils
@@ -298,9 +298,9 @@ class AccountService(
               .append(s"IMP:$implementationAddress")
           } catch {
             case ex: Throwable =>
-              S3Util.writeText(UserConfig.baseBucket,
-                               s"output/imp_addr/${e.blockNumber}.except",
-                               ex.getStackTrace.mkString("\n"))
+              GCSUtil.writeText(UserConfig.baseBucket,
+                                s"output/imp_addr/${e.blockNumber}.except",
+                                ex.getStackTrace.mkString("\n"))
           }
         }
 

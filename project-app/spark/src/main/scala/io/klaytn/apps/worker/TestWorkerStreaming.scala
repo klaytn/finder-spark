@@ -1,7 +1,7 @@
 package io.klaytn.apps.worker
 
 import io.klaytn.apps.common.TestDataAggregator
-import io.klaytn.utils.s3.S3Util
+import io.klaytn.utils.gcs.GCSUtil
 import io.klaytn.utils.spark.KafkaStreamingHelper
 import org.apache.spark.TaskContext
 
@@ -25,7 +25,7 @@ object TestWorkerStreaming extends KafkaStreamingHelper {
                                      offset)
             }
 
-            S3Util.writeText(
+            GCSUtil.writeText(
               "klaytn-dev-spark",
               s"output/test/object/${System
                 .currentTimeMillis()}_TID_${Thread.currentThread().getId}_PID_${TaskContext.getPartitionId()}",

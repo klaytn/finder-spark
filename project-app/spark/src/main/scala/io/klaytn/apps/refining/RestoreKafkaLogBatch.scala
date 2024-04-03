@@ -9,11 +9,11 @@ object RestoreKafkaLogBatch extends SparkHelper {
     Seq("block", "trace").foreach { topic =>
       0 to 1260 foreach { bnp =>
         val logPath =
-          s"s3a://${UserConfig.logStorageS3Path}/klaytn/cypress/label=kafka_log/topic=$topic/bnp=$bnp/*.gz"
+          s"gs://${UserConfig.logStorageS3Path}/klaytn/cypress/label=kafka_log/topic=$topic/bnp=$bnp/*.gz"
         sc.textFile(logPath)
           .repartition(30)
           .saveAsTextFile(
-            s"s3a://test/klaytn/cypress/label=kafka_log/topic=$topic/bnp=$bnp",
+            s"gs://test/klaytn/cypress/label=kafka_log/topic=$topic/bnp=$bnp",
             classOf[GzipCodec])
       }
     }

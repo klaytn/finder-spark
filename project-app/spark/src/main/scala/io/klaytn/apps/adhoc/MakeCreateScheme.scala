@@ -7,7 +7,7 @@ import io.klaytn.utils.spark.{SparkHelper, UserConfig}
   *--packages org.apache.hadoop:hadoop-aws:3.3.1 \
   *--conf spark.app.s3a.access.key=... \
   *--conf spark.app.s3a.secret.key=... \
-  *--conf spark.app.create.scheme.path.prefix="s3a://klaytn-prod-lake/klaytn" \
+  *--conf spark.app.create.scheme.path.prefix="gs://klaytn-prod-lake/klaytn" \
   *--conf spark.app.create.scheme.path.suffix="bnp=100/" \
   *--conf spark.app.create.scheme.path.partitionedBy="bnp int" \
   *--conf spark.app.create.scheme.table="transaction_receipts" \
@@ -35,14 +35,14 @@ object MakeCreateScheme extends SparkHelper {
     val result =
       s"""CREATE EXTERNAL TABLE $tableName (
          |${cols})
-         |PARTITIONED BY ( 
+         |PARTITIONED BY (
          |  $partitionedBy)
-         |ROW FORMAT SERDE 
+         |ROW FORMAT SERDE
          |  'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe'
          |STORED AS INPUTFORMAT
          |  'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat'
          |OUTPUTFORMAT
-         |  'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat'  
+         |  'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat'
          |LOCATION
          |  '$prefix/label=$tableName/'
          |TBLPROPERTIES (

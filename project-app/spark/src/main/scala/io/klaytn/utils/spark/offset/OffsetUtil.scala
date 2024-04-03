@@ -8,7 +8,7 @@ import org.apache.spark.streaming.kafka010.{HasOffsetRanges, OffsetRange}
 import scala.collection.JavaConverters._
 
 object OffsetUtil {
-  val offsetManager = new S3OffsetManager()
+  val offsetManager = new RedisOffsetManager()
 
   def readOffsetRanges(
       rdd: RDD[ConsumerRecord[String, String]]): Array[OffsetRange] = {

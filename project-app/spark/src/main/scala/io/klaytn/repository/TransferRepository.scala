@@ -119,7 +119,7 @@ abstract class TransferRepository extends AbstractRepository {
     eventLogs0.grouped(3000).foreach { eventLogs =>
       withDB(TokenTransferDB) { c =>
         val pstmt = c.prepareStatement(
-          s"INSERT INTO $tableName (`contract_address`,`from`,`to`,`amount`,`timestamp`,`block_number`," +
+          s"INSERT IGNORE INTO $tableName (`contract_address`,`from`,`to`,`amount`,`timestamp`,`block_number`," +
             "`transaction_hash`,`display_order`) VALUES (?,?,?,?,?,?,?,?)"
         )
 
@@ -162,7 +162,7 @@ abstract class TransferRepository extends AbstractRepository {
     transfers0.grouped(3000).foreach { transfers =>
       withDB(NFTTransferDB) { c =>
         val pstmt = c.prepareStatement(
-          s"INSERT INTO $tableName (`contract_type`,`contract_address`,`from`,`to`,`token_count`," +
+          s"INSERT IGNORE INTO $tableName (`contract_type`,`contract_address`,`from`,`to`,`token_count`," +
             "`token_id`, `timestamp`,`block_number`,`transaction_hash`,`display_order`) VALUES (?,?,?,?,?,?,?,?,?,?)"
         )
 
@@ -494,9 +494,9 @@ abstract class TransferRepository extends AbstractRepository {
   def insertTokenApprove(tokenApproves: Seq[TokenApprove]): Unit = {
     withDB(AccountTokenApprovesDB) { c =>
       val pstmt = c.prepareStatement(
-        s"""INSERT INTO $AccountTokenApprovesTable (`block_number`,`transaction_hash`,`account_address`,`spender_address`,
+        s"""INSERT IGNORE INTO $AccountTokenApprovesTable (`block_number`,`transaction_hash`,`account_address`,`spender_address`,
           `contract_type`,`contract_address`,`approved_amount`,`timestamp`) values (?,?,?,?,?,?,?,?)
-            ON DUPLICATE KEY UPDATE 
+            ON DUPLICATE KEY UPDATE
             `block_number` = IF(`timestamp` < VALUES(`timestamp`), VALUES(`block_number`), `block_number`),
             `transaction_hash` = IF(`timestamp` < VALUES(`timestamp`), VALUES(`transaction_hash`), `transaction_hash`),
             `account_address` = IF(`timestamp` < VALUES(`timestamp`), VALUES(`account_address`), `account_address`),
@@ -583,9 +583,9 @@ abstract class TransferRepository extends AbstractRepository {
   def insertNFTApprove(nftApproves: Seq[NFTApprove]): Unit = {
     withDB(AccountNFTApprovesDB) { c =>
       val pstmt = c.prepareStatement(
-        s"""INSERT INTO $AccountNFTApprovesTable (`block_number`,`transaction_hash`,`account_address`,`spender_address`,
+        s"""INSERT IGNORE INTO $AccountNFTApprovesTable (`block_number`,`transaction_hash`,`account_address`,`spender_address`,
           `contract_type`,`contract_address`,`approved_token_id`,`approved_all`,`timestamp`) values (?,?,?,?,?,?,?,?,?)
-          ON DUPLICATE KEY UPDATE 
+          ON DUPLICATE KEY UPDATE
             `block_number` = IF(`timestamp` < VALUES(`timestamp`), VALUES(`block_number`), `block_number`),
             `transaction_hash` = IF(`timestamp` < VALUES(`timestamp`), VALUES(`transaction_hash`), `transaction_hash`),
             `account_address` = IF(`timestamp` < VALUES(`timestamp`), VALUES(`account_address`), `account_address`),

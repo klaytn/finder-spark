@@ -10,6 +10,7 @@ object FastWorkerStreaming extends KafkaStreamingHelper {
   import FastWorkerStreamingDeps._
 
   def blockRestore(): Unit = {
+    //spark:app:prod-cypress:FastWorkerStreaming:ForceRestoreBlock
     val redisKey = "FastWorkerStreaming:DoNotRestoreBlock"
     val lastCheckTimeRedisKey = "BlockRestore:LastCheckTime"
     // Get the last n from the blocks db.
@@ -55,7 +56,7 @@ object FastWorkerStreaming extends KafkaStreamingHelper {
     val redisKey = "FastWorkerStreaming:nftHolder"
     if (SparkRedis.get(redisKey).isEmpty) {
       SparkRedis.setex(redisKey, 3600, "run")
-      holderService.procNFT(2000L)
+      holderService.procNFTHolder()
       SparkRedis.del(redisKey)
     }
   }
@@ -124,7 +125,7 @@ object FastWorkerStreaming extends KafkaStreamingHelper {
               tokenHolder()
               val s2 = System.currentTimeMillis()
               if (s2 - s1 > 3000) {
-                // SlackUtil.sendMessage(s"FastWorker#1: ${s2 - s1}")
+                SlackUtil.sendMessage(s"FastWorker#1: ${s2 - s1}")
               }
             case 2 =>
               val s1 = System.currentTimeMillis()

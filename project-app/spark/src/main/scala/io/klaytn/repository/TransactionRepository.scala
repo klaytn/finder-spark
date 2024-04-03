@@ -4,6 +4,7 @@ import io.klaytn.dsl.db.withDB
 import io.klaytn.model.{Chain, ChainPhase, RefinedTransactionReceipt}
 import io.klaytn.utils.JsonUtil
 import io.klaytn.utils.JsonUtil.Implicits._
+import scala.collection.mutable
 
 object TransactionRepository {
   val TransactionDB: String = "finder0101"
@@ -113,6 +114,55 @@ abstract class TransactionRepository extends AbstractRepository {
 
       execute(pstmt)
       pstmt.close()
+    }
+  }
+
+  def getMismatchingBlocks(startNum: Long, endNum: Long): List[Long] = {
+    withDB(TransactionDB) { c =>
+      val pstmt = c.prepareStatement(
+        s"select b.`number` from blocks b where b.`number` between ? and ? and (select count(t.id) from transactions t where t.block_number = b.`number`) <> b.transaction_count")
+
+      pstmt.setLong(1, startNum)
+      pstmt.setLong(2, endNum)
+
+      val rs = pstmt.executeQuery()
+      val result = mutable.ArrayBuffer[Long]()
+      while (rs.next()) {
+        result += rs.getLong(1)
+      }
+
+      rs.close()
+      pstmt.close()
+
+      result.toList
+    }
+  }
+
+  def getMissingBlocks(startNum: Long, endNum: Long): List[Long] = {
+    withDB(TransactionDB) { c =>
+      val pstmt = c.prepareStatement(
+        s"select b.`number` from blocks b where b.`number` between ? and ?")
+
+      pstmt.setLong(1, startNum)
+      pstmt.setLong(2, endNum)
+
+      val rs = pstmt.executeQuery()
+      val blocks = mutable.ArrayBuffer[Long]()
+      val result = mutable.ArrayBuffer[Long]()
+      while (rs.next()) {
+        blocks += rs.getLong(1)
+      }
+
+      rs.close()
+      pstmt.close()
+
+      for (i <- startNum to endNum) {
+        if (!blocks.contains(i)) {
+          result += i
+        }
+      }
+
+      result.toList
     }
   }
 }

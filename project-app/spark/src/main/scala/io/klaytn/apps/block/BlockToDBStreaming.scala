@@ -52,7 +52,7 @@ object BlockToDBStreaming extends KafkaStreamingHelper {
                 start = System.currentTimeMillis()
 
                 val (longTimeLogs, result) =
-                  blockService.process(block, jobBasePath)
+                  blockService.processParallel(block, jobBasePath)
                 longTime.appendAll(longTimeLogs)
 
                 result

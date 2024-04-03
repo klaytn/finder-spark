@@ -1,6 +1,6 @@
 package io.klaytn.utils
 
-import io.klaytn.utils.s3.S3Util
+import io.klaytn.utils.gcs.GCSUtil
 import io.klaytn.utils.spark.UserConfig
 
 object LastIDUtil {
@@ -10,13 +10,13 @@ object LastIDUtil {
   private def saveToS3(lastIdS3PathPrefix: String,
                        key: String,
                        data: String): Unit =
-    S3Util.writeText(UserConfig.baseBucket,
-                     getS3Key(lastIdS3PathPrefix, key),
-                     data)
+    GCSUtil.writeText(UserConfig.baseBucket,
+                      getS3Key(lastIdS3PathPrefix, key),
+                      data)
 
   private def getLastId(lastIdS3PathPrefix: String,
                         key: String): Option[String] =
-    S3Util.readText(UserConfig.baseBucket, getS3Key(lastIdS3PathPrefix, key))
+    GCSUtil.readText(UserConfig.baseBucket, getS3Key(lastIdS3PathPrefix, key))
 
   private val FastWorkerLastIdS3PathPrefix =
     "jobs/io.klaytn.apps.worker.FastWorkerStreaming/lastId"

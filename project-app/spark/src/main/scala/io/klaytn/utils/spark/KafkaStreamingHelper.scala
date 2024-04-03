@@ -52,8 +52,6 @@ trait KafkaStreamingHelper extends StreamingHelper {
       case "resume" =>
         val resumeOffset =
           OffsetUtil.readResumeOffsets(offsetBucket, offsetKey)
-        SlackUtil.sendMessage(s"""topics: ${topics.mkString(",")}
-                                 |resume: $resumeOffset; isEmpty: ${resumeOffset.isEmpty}""".stripMargin)
         if (resumeOffset.isEmpty) {
           OffsetUtil.readLatestOffsets(topics, kafkaParams)
         } else {

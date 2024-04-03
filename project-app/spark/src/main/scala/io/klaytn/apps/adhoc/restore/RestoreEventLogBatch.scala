@@ -16,7 +16,7 @@ object RestoreEventLogBatch extends SparkHelper {
     try {
       import spark.implicits._
       val df =
-        spark.read.parquet("s3a://klaytn-prod-lake/klaytn/label=event_logs/")
+        spark.read.parquet("gs://klaytn-prod-lake/klaytn/label=event_logs/")
 
       //  [address, blockHash, blockNumber, data, logIndex, timestamp, topics, transactionHash, transactionIndex, transactionStatus]
       df.map { row =>

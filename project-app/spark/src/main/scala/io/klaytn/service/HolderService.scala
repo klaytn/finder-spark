@@ -10,7 +10,7 @@ import io.klaytn.persistent.{HolderPersistentAPI, TransferPersistentAPI}
 import io.klaytn.repository._
 import io.klaytn.utils.config.{Constants, FunctionSupport}
 import io.klaytn.utils.klaytn.NumberConverter._
-import io.klaytn.utils.s3.S3Util
+import io.klaytn.utils.gcs.GCSUtil
 import io.klaytn.utils.spark.UserConfig
 import io.klaytn.utils.SlackUtil
 import io.klaytn.model.finder.NFTTransfer
@@ -54,7 +54,7 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
   def saveToS3(key: String, data: String): Unit = {
     val s3Key =
       s"jobs/io.klaytn.apps.worker.FastWorkerStreaming/lastId/$key.${UserConfig.chainPhase.chain}"
-    S3Util.writeText(UserConfig.baseBucket, s3Key, data)
+    GCSUtil.writeText(UserConfig.baseBucket, s3Key, data)
   }
 
   def calAmount(m: mutable.Map[String, (BigInt, Int, Long)],
@@ -142,13 +142,8 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
     transferService.insertAccountTransferContracts(accountTransferContracts)
 
     SparkRedis.set(redisKey, s"${tokenTransfers.map(_.id).max}")
-    saveToS3(redisKey, s"${tokenTransfers.map(_.id).max}")
   }
 
-  /**
-    * Original NFT Holder Process
-    * @deprecated
-    */
   def procNFTHolder(): Unit = {
     val redisKey = "HolderService:NFT:LastBlock"
     val tableId = SparkRedis.get(redisKey) match {
@@ -249,7 +244,7 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
       .filter(x => !isZeroOrDead(x.holderAddress))
       .foreach(x => holderPersistentAPI.insertKIP17Inventories(Seq(x)))
 
-//    S3Util.writeText(
+//    GCSUtil.writeText(
 //      "klaytn-prod-spark",
 //      s"output/fastworker/nftitems/${System.currentTimeMillis()}.step1.${FunctionSupport
 //        .nftItems(UserConfig.chainPhase)}.$tableId.${nftTransfers.map(_.id.getOrElse(0L)).max}.${nftItems.size}",
@@ -278,7 +273,6 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
     transferService.insertAccountTransferContracts(accountTransferContracts)
 
     SparkRedis.set(redisKey, s"${nftTransfers.map(_.id.getOrElse(0L)).max}")
-    saveToS3(redisKey, s"${nftTransfers.map(_.id.getOrElse(0L)).max}")
   }
 
   /**
@@ -698,7 +692,6 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
       if (accountProc > redisProc) {
         logs.put("Setting new Redis proc", s"${redisProc} => ${accountProc}")
         SparkRedis.set(NFTProcFlags.redis, accountProc.toString())
-        saveToS3(NFTProcFlags.redis, accountProc.toString())
         s4 = System.currentTimeMillis()
       } else if (accountProc <= redisProc) {
         logs.put("Redis is up to date",
@@ -855,7 +848,6 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
     }
 
     SparkRedis.set(redisKey, s"${burns.map(_.id).max}")
-    saveToS3(redisKey, s"${burns.map(_.id).max}")
   }
 
   def procNFTBurnAmount(): Unit = {
@@ -909,7 +901,6 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
     }
 
     SparkRedis.set(redisKey, s"${burns.map(_.id.getOrElse(0L)).max}")
-    saveToS3(redisKey, s"${burns.map(_.id.getOrElse(0L)).max}")
   }
 
   private def enqueueCorrectTokenHolder(queueRedisKey: String,
@@ -939,7 +930,6 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
         SparkRedis.zaddNX(queueRedisKey, nowScore, s"${k._1}\t${k._2}"))
 
     SparkRedis.set(redisKey, s"${tokenTransfers.map(_.id).max}")
-    saveToS3(redisKey, s"${tokenTransfers.map(_.id).max}")
   }
 
   def procCorrectTokenHolder(): Unit = {
@@ -1022,7 +1012,6 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
         SparkRedis.zaddNX(queueRedisKey, nowScore, s"${k._1}\t${k._2}"))
 
     SparkRedis.set(redisKey, s"${nftTransfers.map(_.id.get).max}")
-    saveToS3(redisKey, s"${nftTransfers.map(_.id.get).max}")
   }
 
   def procCorrectNFTHolder(): Unit = {
@@ -1039,50 +1028,48 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
           (s(0), s(1))
       }
 
-    // Already working with triggers!
+    val kip17 = new KIP17MetadataReader(CaverFactory.caver)
 
-    // val kip17 = new KIP17MetadataReader(CaverFactory.caver)
+    val contractMap = dequeueData
+      .map(_._1)
+      .distinct
+      .flatMap(contractAddress => contractService.findContract(contractAddress))
+      .filter(c => c.contractType == KIP17 || c.contractType == ERC721)
+      .map(c => (c.contractAddress, c))
+      .toMap
 
-    // val contractMap = dequeueData
-    //   .map(_._1)
-    //   .distinct
-    //   .flatMap(contractAddress => contractService.findContract(contractAddress))
-    //   .filter(c => c.contractType == KIP17 || c.contractType == ERC721)
-    //   .map(c => (c.contractAddress, c))
-    //   .toMap
+    dequeueData
+      .foreach {
+        case (contractAddress, holderAddress) =>
+          val (dbAmount, id) =
+            holderPersistentAPI
+              .getNFTBalanceAndId(contractAddress, holderAddress)
+              .getOrElse((BigInt(0), 0L))
 
-    // dequeueData
-    //   .foreach {
-    //     case (contractAddress, holderAddress) =>
-    //       val (dbAmount, id) =
-    //         holderPersistentAPI
-    //           .getNFTBalanceAndId(contractAddress, holderAddress)
-    //           .getOrElse((BigInt(0), 0L))
+          try {
+            val chainAmount =
+              if (contractMap.contains(contractAddress))
+                kip17
+                  .balanceOf(contractAddress, holderAddress)
+                  .getOrElse(BigInt(0))
+              else
+                throw new RuntimeException(
+                  s"'$contractAddress' is not kip17(erc721).")
 
-    //       try {
-    //         val chainAmount =
-    //           if (contractMap.contains(contractAddress))
-    //             kip17
-    //               .balanceOf(contractAddress, holderAddress)
-    //               .getOrElse(BigInt(0))
-    //           else
-    //             throw new RuntimeException(
-    //               s"'$contractAddress' is not kip17(erc721).")
-
-    //         if (chainAmount != dbAmount) {
-    //           holderPersistentAPI.updateNFTBalance(contractAddress,
-    //                                                holderAddress,
-    //                                                chainAmount)
-    //           holderPersistentAPI.insertCorrectHolderHistory(contractAddress,
-    //                                                          holderAddress,
-    //                                                          chainAmount,
-    //                                                          dbAmount)
-    //           FinderRedis.del(s"cache/nft-holder::$id")
-    //         }
-    //       } catch {
-    //         case _: Throwable =>
-    //       }
-    //   }
+            if (chainAmount != dbAmount) {
+              holderPersistentAPI.updateNFTBalance(contractAddress,
+                                                   holderAddress,
+                                                   chainAmount)
+              holderPersistentAPI.insertCorrectHolderHistory(contractAddress,
+                                                             holderAddress,
+                                                             chainAmount,
+                                                             dbAmount)
+              FinderRedis.del(s"cache/nft-holder::$id")
+            }
+          } catch {
+            case _: Throwable =>
+          }
+      }
 
     // If the fetched data is less than getcount, delete it as a range, and if it is more than getcount, delete it one by one.
     if (dequeueData.size < getCount)
