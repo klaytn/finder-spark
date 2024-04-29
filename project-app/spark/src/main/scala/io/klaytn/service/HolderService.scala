@@ -183,9 +183,10 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
     val kip17Inventories = nftTransfers
       .filter(x => x.contractType == KIP17 || x.contractType == ERC721)
       .flatMap { x =>
-        val uri = contractService.getTokenUri(x.contractType,
-                                              x.contractAddress,
-                                              x.tokenId)
+        // val uri = contractService.getTokenUri(x.contractType,
+        //                                       x.contractAddress,
+        //                                       x.tokenId)
+        val uri = "-"
 
 //      val v = nftItems.getOrElseUpdate((x.contractAddress, x.tokenId), (0, x.contractType, uri))
 //      nftItems((x.contractAddress, x.tokenId)) = (v._1 + 1, x.contractType, uri)
@@ -209,9 +210,10 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
     val kip37Holders = nftTransfers
       .filter(x => x.contractType == KIP37 || x.contractType == ERC1155)
       .flatMap { x =>
-        val uri = contractService.getTokenUri(x.contractType,
-                                              x.contractAddress,
-                                              x.tokenId)
+        val uri = "-"
+        // val uri = contractService.getTokenUri(x.contractType,
+        //                                       x.contractAddress,
+        //                                       x.tokenId)
 
 //      val v = nftItems.getOrElseUpdate((x.contractAddress, x.tokenId), (0, x.contractType, uri))
 //      nftItems((x.contractAddress, x.tokenId)) = (v._1 + 1, x.contractType, uri)
