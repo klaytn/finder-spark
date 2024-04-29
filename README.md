@@ -173,6 +173,12 @@ You can find the file in the following path.
 ./release.sh finder-streaming-prod io.klaytn.apps.worker.FastWorkerStreaming cypress --build
 ./release.sh finder-streaming-prod io.klaytn.apps.worker.FastWorkerStreaming baobab --build
 
+./release.sh finder-streaming-prod io.klaytn.apps.worker.TokenWorkerStreaming cypress --build
+./release.sh finder-streaming-prod io.klaytn.apps.worker.TokenWorkerStreaming baobab --build
+
+./release.sh finder-streaming-prod io.klaytn.apps.worker.NFTWorkerStreaming cypress --build
+./release.sh finder-streaming-prod io.klaytn.apps.worker.NFTWorkerStreaming baobab --build
+
 ./release.sh finder-streaming-prod io.klaytn.apps.worker.SlowWorkerStreaming cypress --build
 ./release.sh finder-streaming-prod io.klaytn.apps.worker.SlowWorkerStreaming baobab --build
 
