@@ -25,7 +25,7 @@ trait BlockPersistentAPI extends Serializable {
   def dailyMinMaxAccumulateBurnFees(fromBlock: Long,
                                     toBlock: Long,
                                     fromTs: Int,
-                                    toTs: Int): Seq[String]
+                                    toTs: Int): Seq[(String, String)]
   def totalTransactionCount(limit: Int): Long
   def maxBlockNumber(): Long
   def getLatestBlockBurnInfo(): (Long, BigInt, BigInt)

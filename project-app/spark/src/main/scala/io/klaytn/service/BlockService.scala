@@ -174,7 +174,8 @@ class BlockService(blockPersistentAPI: LazyEval[BlockPersistentAPI],
                     currentBlockNumber - (index - 1) * 86400,
                     from,
                     to)
-                  .map(_.hexToBigInt())
+                  .map(x => (x._1.hexToBigInt(), x._2.hexToBigInt()))
+                  .map(x => x._1 + x._2)
                   .sorted
 
                 result.last - result.head

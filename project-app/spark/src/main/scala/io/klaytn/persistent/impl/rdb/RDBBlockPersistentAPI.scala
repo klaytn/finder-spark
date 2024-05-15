@@ -33,10 +33,11 @@ class RDBBlockPersistentAPI() extends BlockRepository with BlockPersistentAPI {
     super.dailyTotalTransactionCount(fromBlock, toBlock, fromTs, toTs)
   }
 
-  override def dailyMinMaxAccumulateBurnFees(fromBlock: Long,
-                                             toBlock: Long,
-                                             fromTs: Int,
-                                             toTs: Int): Seq[String] = {
+  override def dailyMinMaxAccumulateBurnFees(
+      fromBlock: Long,
+      toBlock: Long,
+      fromTs: Int,
+      toTs: Int): Seq[(String, String)] = {
     super.dailyMinMaxAccumulateBurnFees(fromBlock, toBlock, fromTs, toTs)
   }
 
