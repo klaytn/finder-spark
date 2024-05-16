@@ -42,10 +42,7 @@ object TokenURI extends KafkaStreamingHelper {
     }
   }
   override def run(args: Array[String]): Unit = {
-    //  10000 rows
-    //  160000000L  / 10000 = 16_000
-    // 2290000 ~ 2300000
-    2290L to 16000L foreach { x =>
+    2967L to 16000L foreach { x =>
       val t1 = System.currentTimeMillis()
       tokenURI(x * 10000, 10000)
       SlackUtil.sendMessage(
