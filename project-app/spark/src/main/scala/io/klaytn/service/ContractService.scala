@@ -142,6 +142,12 @@ class ContractService(
       holderPersistentAPI.insertNFTPatternedUri(contractAddress, uri)
     }
     uri.replace("{id}", tokenId.toString())
+
+    if (uri != null && uri.length <= 255) {
+      uri
+    } else {
+      "-"
+    }
   }
 
   def applyDecimal(raw: BigDecimal, decimal: Int): BigDecimal = {

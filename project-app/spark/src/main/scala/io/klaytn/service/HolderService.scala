@@ -15,6 +15,7 @@ import io.klaytn.utils.spark.UserConfig
 import io.klaytn.utils.SlackUtil
 import io.klaytn.model.finder.NFTTransfer
 import scala.collection.mutable
+import org.apache.spark.sql.SparkSession
 
 class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
                     transferPersistentAPI: LazyEval[TransferPersistentAPI],
@@ -822,6 +823,46 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
       }
       Thread.sleep(100)
     }
+  }
+  def procTokenURI(spark: SparkSession): Unit = {
+    val redisKey = "HolderService:TokenURI:LastBlock"
+    val tableId = SparkRedis.get(redisKey) match {
+      case Some(info) => info.toLong
+      case _          => return
+    }
+
+    val nftTransfers =
+      transferPersistentAPI.getNFTTransfers(tableId, 2000).sortBy(_.timestamp)
+
+    if (nftTransfers.isEmpty) return
+    // Parrallelize
+    val nftTransfersRDD = spark.sparkContext.parallelize(nftTransfers, 20)
+    nftTransfersRDD.foreachPartition { partition =>
+      try {
+        val tokenURIs = partition
+          .map { (x) =>
+            val contractAddress = x.contractAddress
+            val tokenId = x.tokenId
+            val tokenURI =
+              contractService.getFreshTokenURI(
+                x.contractType,
+                contractAddress,
+                tokenId
+              )
+            (contractAddress, tokenId.toString, tokenURI)
+          }
+          .toSeq
+          .filter(_._3 != "-")
+        if (tokenURIs.nonEmpty)
+          holderPersistentAPI.updateTokenUriBulk(tokenURIs)
+      } catch {
+        case e: Exception =>
+          SlackUtil.sendMessage(
+            s"procTokenURI() Error! ${e.getMessage} ${e.getStackTrace.mkString("\n")}")
+          throw e
+      }
+    }
+    SparkRedis.set(redisKey, s"${nftTransfers.map(_.id.getOrElse(0L)).max}")
   }
 
   def procTokenBurnAmount(): Unit = {

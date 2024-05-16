@@ -52,7 +52,7 @@ class CaverService(caverUrl: String,
       .getOrElse(BigInt(0))
 
   def getBalance(address: String, blockNumber: Long): BigInt = {
-    BigInt(caver.rpc.klay.getBalance(address).send().getValue)
+    BigInt(caver.rpc.klay.getBalance(address, blockNumber).send().getValue)
   }
 
   def getNFT(contractAddress: String): Option[Contract] = {

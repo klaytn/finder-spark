@@ -8,13 +8,15 @@ import io.klaytn.repository.{
   NFTInventories,
   TokenHolders
 }
-
+import io.klaytn.model.finder.ContractType
 class RDBHolderPersistentAPI(
-    contractPersistentAPI: LazyEval[ContractPersistentAPI])
-    extends HolderRepository(contractPersistentAPI)
+    contractPersistentAPI: LazyEval[ContractPersistentAPI]
+) extends HolderRepository(contractPersistentAPI)
     with HolderPersistentAPI {
-  override def insertNFTPatternedUri(contractAddress: String,
-                                     tokenUri: String): Unit = {
+  override def insertNFTPatternedUri(
+      contractAddress: String,
+      tokenUri: String
+  ): Unit = {
     super.insertNFTPatternedUri(contractAddress, tokenUri)
   }
 
@@ -22,14 +24,25 @@ class RDBHolderPersistentAPI(
     super.getNFTPatternedUri(contractAddress)
   }
 
-  override def getNFTUri(contractAddress: String,
-                         tokenId: BigInt): Option[String] = {
+  override def getInventoriesByIdRange(
+      startId: Long,
+      endId: Long
+  ): Seq[(NFTInventories, ContractType.Value)] = {
+    super.getInventoriesByIdRange(startId, endId)
+  }
+
+  override def getNFTUri(
+      contractAddress: String,
+      tokenId: BigInt
+  ): Option[String] = {
     super.getNFTUri(contractAddress, tokenId)
   }
 
-  override def updateNFTUri(contractAddress: String,
-                            tokenId: BigInt,
-                            uri: String): Unit = {
+  override def updateNFTUri(
+      contractAddress: String,
+      tokenId: BigInt,
+      uri: String
+  ): Unit = {
     super.updateNFTUri(contractAddress, tokenId, uri)
   }
 
@@ -38,7 +51,8 @@ class RDBHolderPersistentAPI(
   }
 
   override def insertKIP17Inventories(
-      nftInventories: Seq[NFTInventories]): Unit = {
+      nftInventories: Seq[NFTInventories]
+  ): Unit = {
     super.insertKIP17Inventories(nftInventories)
   }
 
@@ -60,32 +74,40 @@ class RDBHolderPersistentAPI(
 
   override def getTokenBalanceAndId(
       contractAddress: String,
-      holderAddress: String): Option[(BigInt, Long)] = {
+      holderAddress: String
+  ): Option[(BigInt, Long)] = {
     super.getTokenBalanceAndId(contractAddress, holderAddress)
   }
 
-  override def updateTokenBalance(contractAddress: String,
-                                  holderAddress: String,
-                                  amount: BigInt): Unit = {
+  override def updateTokenBalance(
+      contractAddress: String,
+      holderAddress: String,
+      amount: BigInt
+  ): Unit = {
     super.updateTokenBalance(contractAddress, holderAddress, amount)
   }
 
   override def getNFTBalanceAndId(
       contractAddress: String,
-      holderAddress: String): Option[(BigInt, Long)] = {
+      holderAddress: String
+  ): Option[(BigInt, Long)] = {
     super.getNFTBalanceAndId(contractAddress, holderAddress)
   }
 
-  override def updateNFTBalance(contractAddress: String,
-                                holderAddress: String,
-                                amount: BigInt): Unit = {
+  override def updateNFTBalance(
+      contractAddress: String,
+      holderAddress: String,
+      amount: BigInt
+  ): Unit = {
     super.updateNFTBalance(contractAddress, holderAddress, amount)
   }
 
-  override def insertCorrectHolderHistory(contract: String,
-                                          holder: String,
-                                          chainAmount: BigInt,
-                                          dbAmount: BigInt): Unit =
+  override def insertCorrectHolderHistory(
+      contract: String,
+      holder: String,
+      chainAmount: BigInt,
+      dbAmount: BigInt
+  ): Unit =
     super.insertCorrectHolderHistory(contract, holder, chainAmount, dbAmount)
 
   override def getTokenHolderCount(contractAddress: String): Long =

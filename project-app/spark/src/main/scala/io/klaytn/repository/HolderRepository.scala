@@ -7,6 +7,7 @@ import io.klaytn.contract.lib.{
   KIP37MetadataReader,
   KIP7MetadataReader
 }
+import io.klaytn.model.finder.ContractType
 import io.klaytn.dsl.db.withDB
 import io.klaytn.persistent.ContractPersistentAPI
 import io.klaytn.service.CaverFactory
@@ -15,24 +16,30 @@ import io.klaytn.utils.klaytn.NumberConverter._
 import java.sql.PreparedStatement
 import scala.collection.mutable
 
-case class TokenHolders(contractAddress: String,
-                        holderAddress: String,
-                        amount: BigInt,
-                        timestamp: Int,
-                        blockNumber: Long)
-case class NFTHolders(contractAddress: String,
-                      holderAddress: String,
-                      tokenId: BigInt,
-                      tokenCount: BigInt,
-                      uri: String,
-                      timestamp: Int,
-                      blockNumber: Long)
-case class NFTInventories(isSend: Boolean,
-                          contractAddress: String,
-                          holderAddress: String,
-                          tokenId: BigInt,
-                          uri: String,
-                          timestamp: Int)
+case class TokenHolders(
+    contractAddress: String,
+    holderAddress: String,
+    amount: BigInt,
+    timestamp: Int,
+    blockNumber: Long
+)
+case class NFTHolders(
+    contractAddress: String,
+    holderAddress: String,
+    tokenId: BigInt,
+    tokenCount: BigInt,
+    uri: String,
+    timestamp: Int,
+    blockNumber: Long
+)
+case class NFTInventories(
+    isSend: Boolean,
+    contractAddress: String,
+    holderAddress: String,
+    tokenId: BigInt,
+    uri: String,
+    timestamp: Int
+)
 object HolderRepository {
   val TokenHolderDB = "finder03"
   val NFTHolderDB = "finder03"
@@ -42,14 +49,15 @@ object HolderRepository {
   val NFTPatternedUriTable = "nft_patterned_uri"
 }
 abstract class HolderRepository(
-    contractPersistentAPI: LazyEval[ContractPersistentAPI])
-    extends AbstractRepository {
+    contractPersistentAPI: LazyEval[ContractPersistentAPI]
+) extends AbstractRepository {
   import HolderRepository._
 
   def insertNFTPatternedUri(contractAddress: String, tokenUri: String): Unit = {
     withDB(NFTHolderDB) { c =>
       val pstmt = c.prepareStatement(
-        s"INSERT IGNORE INTO $NFTPatternedUriTable (`contract_address`,`token_uri`) VALUES (?,?)")
+        s"INSERT IGNORE INTO $NFTPatternedUriTable (`contract_address`,`token_uri`) VALUES (?,?)"
+      )
 
       pstmt.setString(1, contractAddress)
       pstmt.setString(2, tokenUri)
@@ -67,7 +75,8 @@ abstract class HolderRepository(
   def getNFTPatternedUri(contractAddress: String): Option[String] = {
     withDB(NFTHolderDB) { c =>
       val pstmt = c.prepareStatement(
-        s"SELECT `token_uri` FROM $NFTPatternedUriTable WHERE `contract_address`=?")
+        s"SELECT `token_uri` FROM $NFTPatternedUriTable WHERE `contract_address`=?"
+      )
 
       pstmt.setString(1, contractAddress)
       val rs = pstmt.executeQuery()
@@ -88,7 +97,8 @@ abstract class HolderRepository(
     withDB(NFTHolderDB) { c =>
       val pstmt =
         c.prepareStatement(
-          s"SELECT `token_uri` FROM $NFTInventoriesTable WHERE `contract_address`=? AND `token_id`=?")
+          s"SELECT `token_uri` FROM $NFTInventoriesTable WHERE `contract_address`=? AND `token_id`=?"
+        )
 
       pstmt.setString(1, contractAddress)
       pstmt.setString(2, tokenId.toString())
@@ -106,13 +116,53 @@ abstract class HolderRepository(
     }
   }
 
-  def updateNFTUri(contractAddress: String,
-                   tokenId: BigInt,
-                   uri: String): Unit = {
+  def getInventoriesByIdRange(
+      startId: Long,
+      endId: Long
+  ): Seq[(NFTInventories, ContractType.Value)] = {
+    withDB(NFTHolderDB) { c =>
+      val pstmt = c.prepareStatement(
+        s"SELECT `contract_address`,`holder_address`,`token_id`,`token_uri`,`last_transaction_time`, `contract_type` FROM $NFTInventoriesTable WHERE `id` BETWEEN ? AND ?"
+      )
+
+      pstmt.setLong(1, startId)
+      pstmt.setLong(2, endId)
+      val rs = pstmt.executeQuery()
+      val result =
+        mutable.ArrayBuffer.empty[(NFTInventories, ContractType.Value)]
+      while (rs.next()) {
+        result.append(
+          (
+            NFTInventories(
+              isSend = false,
+              contractAddress = rs.getString(1),
+              holderAddress = rs.getString(2),
+              tokenId = BigInt(rs.getString(3)),
+              uri = rs.getString(4),
+              timestamp = rs.getInt(5)
+            ),
+            ContractType.from(rs.getInt(6))
+          )
+        )
+      }
+
+      rs.close()
+      pstmt.close()
+
+      result
+    }
+  }
+
+  def updateNFTUri(
+      contractAddress: String,
+      tokenId: BigInt,
+      uri: String
+  ): Unit = {
     withDB(NFTHolderDB) { c =>
       val pstmt =
         c.prepareStatement(
-          s"UPDATE $NFTInventoriesTable SET `token_uri`=?  WHERE `contract_address`=? AND `token_id`=?")
+          s"UPDATE $NFTInventoriesTable SET `token_uri`=?  WHERE `contract_address`=? AND `token_id`=?"
+        )
 
       pstmt.setString(1, uri)
       pstmt.setString(2, contractAddress)
@@ -160,11 +210,13 @@ abstract class HolderRepository(
 //    pstmt.clearParameters()
 //  }
 
-  private def fillInsNFTHolders(pstmt: PreparedStatement,
-                                contractAddress: String,
-                                holderAddress: String,
-                                tokenCount: BigInt,
-                                timestamp: Int): Unit = {
+  private def fillInsNFTHolders(
+      pstmt: PreparedStatement,
+      contractAddress: String,
+      holderAddress: String,
+      tokenCount: BigInt,
+      timestamp: Int
+  ): Unit = {
     pstmt.setString(1, contractAddress)
     pstmt.setString(2, holderAddress)
     pstmt.setString(3, tokenCount.to64BitsHex())
@@ -174,12 +226,14 @@ abstract class HolderRepository(
     pstmt.clearParameters()
   }
 
-  private def fillInsNFTInventories(pstmt: PreparedStatement,
-                                    contractAddress: String,
-                                    holderAddress: String,
-                                    tokenId: BigInt,
-                                    tokenUri: String,
-                                    timestamp: Int): Unit = {
+  private def fillInsNFTInventories(
+      pstmt: PreparedStatement,
+      contractAddress: String,
+      holderAddress: String,
+      tokenId: BigInt,
+      tokenUri: String,
+      timestamp: Int
+  ): Unit = {
     pstmt.setString(1, contractAddress)
     pstmt.setString(2, holderAddress)
     pstmt.setString(3, tokenId.toString())
@@ -190,9 +244,11 @@ abstract class HolderRepository(
     pstmt.clearParameters()
   }
 
-  private def fillDelNFTHolders(pstmt: PreparedStatement,
-                                contractAddress: String,
-                                holderAddress: String): Unit = {
+  private def fillDelNFTHolders(
+      pstmt: PreparedStatement,
+      contractAddress: String,
+      holderAddress: String
+  ): Unit = {
     pstmt.setString(1, contractAddress)
     pstmt.setString(2, holderAddress)
 
@@ -200,11 +256,13 @@ abstract class HolderRepository(
     pstmt.clearParameters()
   }
 
-  private def fillUpdateNFTHolders(pstmt: PreparedStatement,
-                                   amount: BigInt,
-                                   lastTransactionTime: Int,
-                                   contractAddress: String,
-                                   holderAddress: String): Unit = {
+  private def fillUpdateNFTHolders(
+      pstmt: PreparedStatement,
+      amount: BigInt,
+      lastTransactionTime: Int,
+      contractAddress: String,
+      holderAddress: String
+  ): Unit = {
     pstmt.setString(1, amount.to64BitsHex())
     pstmt.setInt(2, lastTransactionTime)
     pstmt.setString(3, contractAddress)
@@ -214,10 +272,12 @@ abstract class HolderRepository(
     pstmt.clearParameters()
   }
 
-  private def fillUpdateTokenUriBulk(pstmt: PreparedStatement,
-                                     tokenUri: String,
-                                     contractAddress: String,
-                                     tokenId: String): Unit = {
+  private def fillUpdateTokenUriBulk(
+      pstmt: PreparedStatement,
+      tokenUri: String,
+      contractAddress: String,
+      tokenId: String
+  ): Unit = {
     pstmt.setString(1, tokenUri)
     pstmt.setString(2, contractAddress)
     pstmt.setString(3, tokenId)
@@ -225,10 +285,12 @@ abstract class HolderRepository(
     pstmt.clearParameters()
   }
 
-  private def fillDelNFTInventories(pstmt: PreparedStatement,
-                                    contractAddress: String,
-                                    holderAddress: String,
-                                    tokenId: BigInt): Unit = {
+  private def fillDelNFTInventories(
+      pstmt: PreparedStatement,
+      contractAddress: String,
+      holderAddress: String,
+      tokenId: BigInt
+  ): Unit = {
     pstmt.setString(1, contractAddress)
     pstmt.setString(2, holderAddress)
     pstmt.setString(3, tokenId.toString())
@@ -237,13 +299,15 @@ abstract class HolderRepository(
     pstmt.clearParameters()
   }
 
-  private def fillInsKIP37Holders(pstmt: PreparedStatement,
-                                  contractAddress: String,
-                                  holderAddress: String,
-                                  tokenId: BigInt,
-                                  tokenUri: String,
-                                  tokenCount: BigInt,
-                                  timestamp: Int): Unit = {
+  private def fillInsKIP37Holders(
+      pstmt: PreparedStatement,
+      contractAddress: String,
+      holderAddress: String,
+      tokenId: BigInt,
+      tokenUri: String,
+      tokenCount: BigInt,
+      timestamp: Int
+  ): Unit = {
     pstmt.setString(1, contractAddress)
     pstmt.setString(2, holderAddress)
     pstmt.setString(3, tokenId.toString())
@@ -255,12 +319,14 @@ abstract class HolderRepository(
     pstmt.clearParameters()
   }
 
-  private def fillUpdateKIP37Holders(pstmt: PreparedStatement,
-                                     tokenCount: BigInt,
-                                     lastTransactionTime: Int,
-                                     contractAddress: String,
-                                     holderAddress: String,
-                                     tokenId: BigInt): Unit = {
+  private def fillUpdateKIP37Holders(
+      pstmt: PreparedStatement,
+      tokenCount: BigInt,
+      lastTransactionTime: Int,
+      contractAddress: String,
+      holderAddress: String,
+      tokenId: BigInt
+  ): Unit = {
     pstmt.setString(1, tokenCount.to64BitsHex())
     pstmt.setInt(2, lastTransactionTime)
     pstmt.setString(3, contractAddress)
@@ -271,10 +337,12 @@ abstract class HolderRepository(
     pstmt.clearParameters()
   }
 
-  private def fillDelKIP37Holders(pstmt: PreparedStatement,
-                                  contractAddress: String,
-                                  holderAddress: String,
-                                  tokenId: BigInt): Unit = {
+  private def fillDelKIP37Holders(
+      pstmt: PreparedStatement,
+      contractAddress: String,
+      holderAddress: String,
+      tokenId: BigInt
+  ): Unit = {
     pstmt.setString(1, contractAddress)
     pstmt.setString(2, holderAddress)
     pstmt.setString(3, tokenId.toString())
@@ -311,7 +379,8 @@ abstract class HolderRepository(
       withDB(TokenHolderDB) { c =>
         val pstmtIns = c.prepareStatement(
           s"INSERT IGNORE INTO $TokenHoldersTable (`contract_address`,`holder_address`,`amount`,`last_transaction_time`)" +
-            " VALUES (?,?,?,?)")
+            " VALUES (?,?,?,?)"
+        )
         pstmtIns.setString(1, t.contractAddress)
         pstmtIns.setString(2, t.holderAddress)
         pstmtIns.setString(3, t.amount.to64BitsHex())
@@ -326,7 +395,8 @@ abstract class HolderRepository(
     val result = withDB(TokenHolderDB) { c =>
       val pstmtUp = c.prepareStatement(
         s"UPDATE $TokenHoldersTable SET `amount`=?,`last_transaction_time`=?" +
-          " WHERE `contract_address`=? AND `holder_address`=?")
+          " WHERE `contract_address`=? AND `holder_address`=?"
+      )
       update.foreach { t =>
         pstmtUp.setString(1, t.amount.to64BitsHex())
         pstmtUp.setInt(2, t.timestamp)
@@ -343,14 +413,16 @@ abstract class HolderRepository(
     }
 
     insertTokenHolders0(
-      update.zipWithIndex.filter(x => result(x._2) == 0).map(_._1))
+      update.zipWithIndex.filter(x => result(x._2) == 0).map(_._1)
+    )
   }
 
   def deleteTokenHolders(delete: Seq[TokenHolders]): Unit = {
     withDB(TokenHolderDB) { c =>
       val pstmtDel =
         c.prepareStatement(
-          s"DELETE FROM $TokenHoldersTable WHERE `contract_address`=? AND `holder_address`=?")
+          s"DELETE FROM $TokenHoldersTable WHERE `contract_address`=? AND `holder_address`=?"
+        )
 
       delete.foreach { t =>
         pstmtDel.setString(1, t.contractAddress)
@@ -375,7 +447,8 @@ abstract class HolderRepository(
     withDB(TokenHolderDB) { c =>
       val pstmtSelAmount =
         c.prepareStatement(
-          s"SELECT `amount`,`last_transaction_time`,`id` FROM $TokenHoldersTable WHERE `contract_address`=? AND `holder_address`=?")
+          s"SELECT `amount`,`last_transaction_time`,`id` FROM $TokenHoldersTable WHERE `contract_address`=? AND `holder_address`=?"
+        )
 
       tokenTransfers.foreach { t =>
         pstmtSelAmount.setString(1, t.contractAddress)
@@ -398,11 +471,14 @@ abstract class HolderRepository(
           } else {
             val ts = Math.max(lastTransactionTime, t.timestamp)
             update.append(
-              TokenHolders(t.contractAddress,
-                           t.holderAddress,
-                           amount,
-                           ts,
-                           t.blockNumber))
+              TokenHolders(
+                t.contractAddress,
+                t.holderAddress,
+                amount,
+                ts,
+                t.blockNumber
+              )
+            )
           }
         } else if (t.amount > 0) {
           insert.append(t)
@@ -470,12 +546,14 @@ abstract class HolderRepository(
       nftInventories
         .filter(!_.isSend)
         .foreach { t =>
-          fillInsNFTInventories(pstmtInsInventories,
-                                t.contractAddress,
-                                t.holderAddress,
-                                t.tokenId,
-                                t.uri,
-                                t.timestamp)
+          fillInsNFTInventories(
+            pstmtInsInventories,
+            t.contractAddress,
+            t.holderAddress,
+            t.tokenId,
+            t.uri,
+            t.timestamp
+          )
         }
 
       execute(pstmtInsInventories)
@@ -487,7 +565,8 @@ abstract class HolderRepository(
     nftInventories.filter(_.isSend).foreach { t =>
       withDB(NFTHolderDB) { c =>
         val pstmt = c.prepareStatement(
-          s"SELECT `id` FROM $NFTInventoriesTable WHERE `contract_address`=? AND `holder_address`=? AND `token_id`=?")
+          s"SELECT `id` FROM $NFTInventoriesTable WHERE `contract_address`=? AND `holder_address`=? AND `token_id`=?"
+        )
 
         pstmt.setString(1, t.contractAddress)
         pstmt.setString(2, t.holderAddress)
@@ -503,16 +582,19 @@ abstract class HolderRepository(
     withDB(NFTHolderDB) { c =>
       val pstmtDelInventories = c.prepareStatement(
         s"DELETE FROM $NFTInventoriesTable" +
-          " WHERE `contract_address`=? AND `holder_address`=? AND `token_id`=? and `contract_type`=2")
+          " WHERE `contract_address`=? AND `holder_address`=? AND `token_id`=? and `contract_type`=2"
+      )
 
       nftInventories
         .filter(_.isSend)
         .foreach(
           t =>
-            fillDelNFTInventories(pstmtDelInventories,
-                                  t.contractAddress,
-                                  t.holderAddress,
-                                  t.tokenId))
+            fillDelNFTInventories(
+              pstmtDelInventories,
+              t.contractAddress,
+              t.holderAddress,
+              t.tokenId
+          ))
 
       execute(pstmtDelInventories)
       pstmtDelInventories.close()
@@ -549,19 +631,22 @@ abstract class HolderRepository(
     val nftHolders = data.map {
       case ((contractAddress, holderAddress), (tokenCount, ts, blockNumber)) =>
 //        s3logging(contractAddress, holderAddress, blockNumber, s"$blockNumber.step1.$tokenCount", "")
-        NFTHolders(contractAddress,
-                   holderAddress,
-                   null,
-                   tokenCount,
-                   null,
-                   ts,
-                   blockNumber)
+        NFTHolders(
+          contractAddress,
+          holderAddress,
+          null,
+          tokenCount,
+          null,
+          ts,
+          blockNumber
+        )
     }
 
     withDB(NFTHolderDB) { c =>
       val pstmtSelTokenCount =
         c.prepareStatement(
-          s"SELECT `token_count`,`last_transaction_time`,`id` FROM $NFTHoldersTable WHERE `contract_address`=? AND `holder_address`=?")
+          s"SELECT `token_count`,`last_transaction_time`,`id` FROM $NFTHoldersTable WHERE `contract_address`=? AND `holder_address`=?"
+        )
 
       nftHolders.foreach { t =>
         pstmtSelTokenCount.setString(1, t.contractAddress)
@@ -598,13 +683,16 @@ abstract class HolderRepository(
           else {
             val ts = Math.max(lastTransactionTime, t.timestamp)
             update.append(
-              NFTHolders(t.contractAddress,
-                         t.holderAddress,
-                         null,
-                         amount,
-                         null,
-                         ts,
-                         t.blockNumber))
+              NFTHolders(
+                t.contractAddress,
+                t.holderAddress,
+                null,
+                amount,
+                null,
+                ts,
+                t.blockNumber
+              )
+            )
           }
         } else if (t.tokenCount > 0) {
 //          s3logging(t.contractAddress,
@@ -630,11 +718,13 @@ abstract class HolderRepository(
         )
         insert.foreach(
           t =>
-            fillInsNFTHolders(pstmtInsHolders,
-                              t.contractAddress,
-                              t.holderAddress,
-                              t.tokenCount,
-                              t.timestamp))
+            fillInsNFTHolders(
+              pstmtInsHolders,
+              t.contractAddress,
+              t.holderAddress,
+              t.tokenCount,
+              t.timestamp
+          ))
         execute(pstmtInsHolders)
         pstmtInsHolders.close()
       }
@@ -649,11 +739,13 @@ abstract class HolderRepository(
         )
         update.foreach(
           t =>
-            fillUpdateNFTHolders(pstmtUpHolders,
-                                 t.tokenCount,
-                                 t.timestamp,
-                                 t.contractAddress,
-                                 t.holderAddress))
+            fillUpdateNFTHolders(
+              pstmtUpHolders,
+              t.tokenCount,
+              t.timestamp,
+              t.contractAddress,
+              t.holderAddress
+          ))
         execute(pstmtUpHolders)
         pstmtUpHolders.close()
       }
@@ -664,7 +756,8 @@ abstract class HolderRepository(
       withDB(NFTHolderDB) { c =>
         val pstmtDelHolders =
           c.prepareStatement(
-            s"DELETE FROM $NFTHoldersTable WHERE `contract_address`=? AND `holder_address`=?")
+            s"DELETE FROM $NFTHoldersTable WHERE `contract_address`=? AND `holder_address`=?"
+          )
         delete.foreach(
           t =>
             fillDelNFTHolders(pstmtDelHolders,
@@ -707,7 +800,8 @@ abstract class HolderRepository(
     withDB(NFTHolderDB) { c =>
       val pstmtSelTokenCount = c.prepareStatement(
         s"SELECT `token_count`,`last_transaction_time`,`id` FROM $NFTInventoriesTable" +
-          " WHERE `contract_address`=? AND `holder_address`=? AND `token_id`=? and `contract_type`=3")
+          " WHERE `contract_address`=? AND `holder_address`=? AND `token_id`=? and `contract_type`=3"
+      )
 
       nftHolders.foreach { t =>
         pstmtSelTokenCount.setString(1, t.contractAddress)
@@ -722,10 +816,12 @@ abstract class HolderRepository(
             try {
               val kip37 = new KIP37MetadataReader(CaverFactory.caver)
               amount = kip37
-                .balanceOf(t.contractAddress,
-                           t.holderAddress,
-                           t.tokenId,
-                           t.blockNumber)
+                .balanceOf(
+                  t.contractAddress,
+                  t.holderAddress,
+                  t.tokenId,
+                  t.blockNumber
+                )
                 .getOrElse(BigInt(0))
             } catch { case _: Throwable => }
           }
@@ -733,13 +829,16 @@ abstract class HolderRepository(
           else {
             val ts = Math.max(lastTransactionTime, t.timestamp)
             update.append(
-              NFTHolders(t.contractAddress,
-                         t.holderAddress,
-                         t.tokenId,
-                         amount,
-                         t.uri,
-                         ts,
-                         t.blockNumber))
+              NFTHolders(
+                t.contractAddress,
+                t.holderAddress,
+                t.tokenId,
+                amount,
+                t.uri,
+                ts,
+                t.blockNumber
+              )
+            )
           }
         } else if (t.tokenCount > 0) insert.append(t)
 
@@ -758,13 +857,15 @@ abstract class HolderRepository(
         )
         insert.foreach { t =>
 //          val uri = ContractUtil.getTokenUri(ContractType.KIP37, t.contractAddress, t.tokenId)
-          fillInsKIP37Holders(pstmtIns,
-                              t.contractAddress,
-                              t.holderAddress,
-                              t.tokenId,
-                              t.uri,
-                              t.tokenCount,
-                              t.timestamp)
+          fillInsKIP37Holders(
+            pstmtIns,
+            t.contractAddress,
+            t.holderAddress,
+            t.tokenId,
+            t.uri,
+            t.tokenCount,
+            t.timestamp
+          )
         }
         execute(pstmtIns)
         pstmtIns.close()
@@ -780,12 +881,14 @@ abstract class HolderRepository(
         )
         update.foreach(
           t =>
-            fillUpdateKIP37Holders(pstmtUp,
-                                   t.tokenCount,
-                                   t.timestamp,
-                                   t.contractAddress,
-                                   t.holderAddress,
-                                   t.tokenId))
+            fillUpdateKIP37Holders(
+              pstmtUp,
+              t.tokenCount,
+              t.timestamp,
+              t.contractAddress,
+              t.holderAddress,
+              t.tokenId
+          ))
         execute(pstmtUp)
         pstmtUp.close()
       }
@@ -800,10 +903,12 @@ abstract class HolderRepository(
         )
         delete.foreach(
           t =>
-            fillDelKIP37Holders(pstmtDel,
-                                t.contractAddress,
-                                t.holderAddress,
-                                t.tokenId))
+            fillDelKIP37Holders(
+              pstmtDel,
+              t.contractAddress,
+              t.holderAddress,
+              t.tokenId
+          ))
         execute(pstmtDel)
         pstmtDel.close()
       }
@@ -831,12 +936,15 @@ abstract class HolderRepository(
     updatedIds.foreach(id => FinderRedis.del(s"cache/nft-inventory::$id"))
   }
 
-  def getTokenBalanceAndId(contractAddress: String,
-                           holderAddress: String): Option[(BigInt, Long)] = {
+  def getTokenBalanceAndId(
+      contractAddress: String,
+      holderAddress: String
+  ): Option[(BigInt, Long)] = {
     withDB(TokenHolderDB) { c =>
       val pstmt =
         c.prepareStatement(
-          s"SELECT `amount`,`id` FROM `$TokenHoldersTable` WHERE `contract_address`=? AND `holder_address`=?")
+          s"SELECT `amount`,`id` FROM `$TokenHoldersTable` WHERE `contract_address`=? AND `holder_address`=?"
+        )
       pstmt.setString(1, contractAddress)
       pstmt.setString(2, holderAddress)
       val rs = pstmt.executeQuery()
@@ -851,13 +959,16 @@ abstract class HolderRepository(
     }
   }
 
-  def updateTokenBalance(contractAddress: String,
-                         holderAddress: String,
-                         amount: BigInt): Unit = {
+  def updateTokenBalance(
+      contractAddress: String,
+      holderAddress: String,
+      amount: BigInt
+  ): Unit = {
     val result = withDB(TokenHolderDB) { c =>
       val pstmt =
         c.prepareStatement(
-          s"UPDATE `$TokenHoldersTable` SET `amount`=? WHERE `contract_address`=? AND `holder_address`=?")
+          s"UPDATE `$TokenHoldersTable` SET `amount`=? WHERE `contract_address`=? AND `holder_address`=?"
+        )
       pstmt.setString(1, amount.to64BitsHex())
       pstmt.setString(2, contractAddress)
       pstmt.setString(3, holderAddress)
@@ -868,15 +979,19 @@ abstract class HolderRepository(
 
     if (result == 0)
       insertTokenHolders0(
-        Seq(TokenHolders(contractAddress, holderAddress, amount, 0, 0L)))
+        Seq(TokenHolders(contractAddress, holderAddress, amount, 0, 0L))
+      )
   }
 
-  def getNFTBalanceAndId(contractAddress: String,
-                         holderAddress: String): Option[(BigInt, Long)] = {
+  def getNFTBalanceAndId(
+      contractAddress: String,
+      holderAddress: String
+  ): Option[(BigInt, Long)] = {
     withDB(NFTHolderDB) { c =>
       val pstmt =
         c.prepareStatement(
-          s"SELECT `token_count`,`id` FROM `$NFTHoldersTable` WHERE `contract_address`=? AND `holder_address`=?")
+          s"SELECT `token_count`,`id` FROM `$NFTHoldersTable` WHERE `contract_address`=? AND `holder_address`=?"
+        )
       pstmt.setString(1, contractAddress)
       pstmt.setString(2, holderAddress)
       val rs = pstmt.executeQuery()
@@ -891,13 +1006,16 @@ abstract class HolderRepository(
     }
   }
 
-  def updateNFTBalance(contractAddress: String,
-                       holderAddress: String,
-                       amount: BigInt): Unit = {
+  def updateNFTBalance(
+      contractAddress: String,
+      holderAddress: String,
+      amount: BigInt
+  ): Unit = {
     withDB(NFTHolderDB) { c =>
       val pstmt =
         c.prepareStatement(
-          s"UPDATE `$NFTHoldersTable` SET `token_count`=? WHERE `contract_address`=? AND `holder_address`=?")
+          s"UPDATE `$NFTHoldersTable` SET `token_count`=? WHERE `contract_address`=? AND `holder_address`=?"
+        )
       pstmt.setString(1, amount.to64BitsHex())
       pstmt.setString(2, contractAddress)
       pstmt.setString(3, holderAddress)
@@ -907,13 +1025,16 @@ abstract class HolderRepository(
     }
   }
 
-  def insertCorrectHolderHistory(contract: String,
-                                 holder: String,
-                                 chainAmount: BigInt,
-                                 dbAmount: BigInt): Unit = {
+  def insertCorrectHolderHistory(
+      contract: String,
+      holder: String,
+      chainAmount: BigInt,
+      dbAmount: BigInt
+  ): Unit = {
     withDB(TokenHolderDB) { c =>
       val pstmt = c.prepareStatement(
-        "INSERT INTO `correct_holder_history` (`contract_address`,`holder_address`,`chain_balance`,`db_balance`) VALUES (?,?,?,?)")
+        "INSERT INTO `correct_holder_history` (`contract_address`,`holder_address`,`chain_balance`,`db_balance`) VALUES (?,?,?,?)"
+      )
 
       pstmt.setString(1, contract)
       pstmt.setString(2, holder)
@@ -927,7 +1048,8 @@ abstract class HolderRepository(
   def getTokenHolderCount(contractAddress: String): Long = {
     withDB(TokenHolderDB) { c =>
       val pstmt = c.prepareStatement(
-        s"SELECT COUNT(*) FROM `$TokenHoldersTable` WHERE `contract_address`=?")
+        s"SELECT COUNT(*) FROM `$TokenHoldersTable` WHERE `contract_address`=?"
+      )
       pstmt.setString(1, contractAddress)
       val rs = pstmt.executeQuery()
       val result =
@@ -941,10 +1063,10 @@ abstract class HolderRepository(
     }
   }
 
-  /**
-    * Update Token URI (BULK) in nft_inventories table
+  /** Update Token URI (BULK) in nft_inventories table
     *
-    * @param tokens Seq[(contractAddress, tokenId, tokenUri)]
+    * @param tokens
+    *   Seq[(contractAddress, tokenId, tokenUri)]
     */
   def updateTokenUriBulk(tokens: Seq[(String, String, String)]): Unit = {
     // Bulk Update
@@ -955,12 +1077,10 @@ abstract class HolderRepository(
           s"UPDATE $NFTInventoriesTable SET `token_uri`=?" +
             " WHERE `contract_address`=? AND `token_id`=?"
         )
-        tokens.map(
-          t => {
-            val (contractAddress, tokenId, tokenUri) = t
-            fillUpdateTokenUriBulk(pstmt, tokenUri, contractAddress, tokenId)
-          }
-        )
+        tokens.map(t => {
+          val (contractAddress, tokenId, tokenUri) = t
+          fillUpdateTokenUriBulk(pstmt, tokenUri, contractAddress, tokenId)
+        })
         val result = execute(pstmt)
         pstmt.close()
         result
@@ -972,7 +1092,8 @@ abstract class HolderRepository(
   def getNFTHolderCount(contractAddress: String): Long = {
     withDB(NFTHolderDB) { c =>
       val pstmt = c.prepareStatement(
-        s"SELECT COUNT(*) FROM `$NFTHoldersTable` WHERE `contract_address`=?")
+        s"SELECT COUNT(*) FROM `$NFTHoldersTable` WHERE `contract_address`=?"
+      )
       pstmt.setString(1, contractAddress)
       val rs = pstmt.executeQuery()
       val result =
