@@ -5,7 +5,7 @@ import io.klaytn.persistent._
 import io.klaytn.service._
 
 object TokenURIDeps {
-  private val chainPhase = ChainPhase.get()
+  val chainPhase = ChainPhase.get()
 
   private val accountPersistentAPI = AccountPersistentAPI.of(chainPhase)
   private val contractPersistentAPI = ContractPersistentAPI.of(chainPhase)

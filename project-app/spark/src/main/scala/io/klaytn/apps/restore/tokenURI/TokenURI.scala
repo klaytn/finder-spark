@@ -46,7 +46,8 @@ object TokenURI extends KafkaStreamingHelper {
       val t1 = System.currentTimeMillis()
       tokenURI(x * 10000, 10000)
       SlackUtil.sendMessage(
-        s"TokenURI: ${x * 10000} ~ ${x * 10000 + 10000} is done. ${System.currentTimeMillis() - t1} ms"
+        s"TokenURI: ${x * 10000} ~ ${x * 10000 + 10000} is done. ${System
+          .currentTimeMillis() - t1} ms, ${chainPhase}"
       )
     }
   }
