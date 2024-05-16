@@ -19,20 +19,24 @@ object BlockRepository {
   val BlockRewardTable: String = "block_rewards"
 }
 
-case class BlockBurns(number: Long,
-                      fees: BigInt,
-                      accumulateFees: BigInt,
-                      accumulateKlay: BigInt,
-                      timestamp: Int)
-case class BlockReward(number: Long,
-                       minted: String,
-                       totalFee: String,
-                       burntFee: String,
-                       proposer: String,
-                       stakers: String,
-                       kgf: String,
-                       kir: String,
-                       rewards: String)
+case class BlockBurns(
+    number: Long,
+    fees: BigInt,
+    accumulateFees: BigInt,
+    accumulateKlay: BigInt,
+    timestamp: Int
+)
+case class BlockReward(
+    number: Long,
+    minted: String,
+    totalFee: String,
+    burntFee: String,
+    proposer: String,
+    stakers: String,
+    kgf: String,
+    kir: String,
+    rewards: String
+)
 
 abstract class BlockRepository extends AbstractRepository {
   import BlockRepository._
@@ -106,7 +110,8 @@ abstract class BlockRepository extends AbstractRepository {
       val pstmt =
         c.prepareStatement(
           s"INSERT IGNORE INTO $BlockRewardTable (`number`,`minted`,`total_fee`,`burnt_fee`,`proposer`,`stakers`,`kgf`," +
-            "`kir`,`rewards`) VALUES (?,?,?,?,?,?,?,?,?)")
+            "`kir`,`rewards`) VALUES (?,?,?,?,?,?,?,?,?)"
+        )
 
       pstmt.setLong(1, blockReward.number)
       pstmt.setString(2, blockReward.minted)
@@ -126,7 +131,8 @@ abstract class BlockRepository extends AbstractRepository {
   def selectRecentBlockNumbers(limit: Int): Seq[Long] = {
     withDB(BlockDB) { c =>
       val pstmt = c.prepareStatement(
-        s"SELECT number FROM $BlockTable ORDER BY number DESC LIMIT $limit")
+        s"SELECT number FROM $BlockTable ORDER BY number DESC LIMIT $limit"
+      )
       val rs = pstmt.executeQuery()
 
       val result = ArrayBuffer.empty[Long]
@@ -145,7 +151,8 @@ abstract class BlockRepository extends AbstractRepository {
     withDB(BlockDB) { c =>
       val pstmt = c.prepareStatement(
         "SELECT MIN(timestamp), MAX(timestamp) FROM (" +
-          s"SELECT timestamp FROM $BlockTable ORDER BY number DESC LIMIT $limit) a")
+          s"SELECT timestamp FROM $BlockTable ORDER BY number DESC LIMIT $limit) a"
+      )
 
       val rs = pstmt.executeQuery()
       val result = if (rs.next()) {
@@ -161,14 +168,17 @@ abstract class BlockRepository extends AbstractRepository {
     }
   }
 
-  def dailyTotalTransactionCount(fromBlock: Long,
-                                 toBlock: Long,
-                                 fromTs: Int,
-                                 toTs: Int): Long = {
+  def dailyTotalTransactionCount(
+      fromBlock: Long,
+      toBlock: Long,
+      fromTs: Int,
+      toTs: Int
+  ): Long = {
     withDB(BlockDB) { c =>
       val pstmt = c.prepareStatement(
         s"SELECT SUM(transaction_count) FROM $BlockTable WHERE number >= $fromBlock AND number < $toBlock" +
-          s" AND timestamp >= $fromTs AND timestamp < $toTs")
+          s" AND timestamp >= $fromTs AND timestamp < $toTs"
+      )
 
       val rs = pstmt.executeQuery()
       val result = if (rs.next()) {
@@ -184,14 +194,17 @@ abstract class BlockRepository extends AbstractRepository {
     }
   }
 
-  def dailyMinMaxAccumulateBurnFees(fromBlock: Long,
-                                    toBlock: Long,
-                                    fromTs: Int,
-                                    toTs: Int): Seq[String] = {
+  def dailyMinMaxAccumulateBurnFees(
+      fromBlock: Long,
+      toBlock: Long,
+      fromTs: Int,
+      toTs: Int
+  ): Seq[(String, String)] = {
     val (minBlockNumber, maxBlockNumber) = withDB(BlockBurnsDB) { c =>
       val pstmt = c.prepareStatement(
         s"SELECT MIN(number), MAX(number) FROM $BlockBurnTable WHERE number >= $fromBlock AND number < $toBlock" +
-          s" AND timestamp >= $fromTs AND timestamp < $toTs")
+          s" AND timestamp >= $fromTs AND timestamp < $toTs"
+      )
 
       val rs = pstmt.executeQuery()
       val result = if (rs.next()) {
@@ -206,16 +219,17 @@ abstract class BlockRepository extends AbstractRepository {
       result
     }
 
-    val result = mutable.ArrayBuffer.empty[String]
+    val result = ArrayBuffer.empty[(String, String)]
     withDB(BlockBurnsDB) { c =>
       val pstmt = c.prepareStatement(
-        s"SELECT accumulate_fees FROM $BlockBurnTable WHERE number IN (?, ?)")
+        s"SELECT accumulate_fees, accumulate_klay FROM $BlockBurnTable WHERE number IN (?, ?)"
+      )
       pstmt.setLong(1, minBlockNumber)
       pstmt.setLong(2, maxBlockNumber)
 
       val rs = pstmt.executeQuery()
       while (rs.next()) {
-        result.append(rs.getString(1))
+        result.append((rs.getString(1), rs.getString(2)))
       }
 
       rs.close()
@@ -226,8 +240,10 @@ abstract class BlockRepository extends AbstractRepository {
 
   def totalTransactionCount(limit: Int): Long = {
     withDB(BlockDB) { c =>
-      val pstmt = c.prepareStatement("SELECT SUM(transaction_count) FROM (" +
-        s"SELECT transaction_count FROM $BlockTable ORDER BY number DESC LIMIT $limit) a")
+      val pstmt = c.prepareStatement(
+        "SELECT SUM(transaction_count) FROM (" +
+          s"SELECT transaction_count FROM $BlockTable ORDER BY number DESC LIMIT $limit) a"
+      )
 
       val rs = pstmt.executeQuery()
       val result = if (rs.next()) {
@@ -246,7 +262,8 @@ abstract class BlockRepository extends AbstractRepository {
   def maxBlockNumber(): Long = {
     withDB(BlockDB) { c =>
       val pstmt = c.prepareStatement(
-        s"SELECT number FROM $BlockTable ORDER BY number DESC LIMIT 1")
+        s"SELECT number FROM $BlockTable ORDER BY number DESC LIMIT 1"
+      )
 
       val rs = pstmt.executeQuery()
       val result = if (rs.next()) {
@@ -265,7 +282,8 @@ abstract class BlockRepository extends AbstractRepository {
   def getLatestBlockInfo(): (Long, Long) = {
     withDB(BlockDB) { c =>
       val pstmt = c.prepareStatement(
-        s"SELECT `number`, `timestamp` FROM $BlockTable ORDER BY number DESC LIMIT 1")
+        s"SELECT `number`, `timestamp` FROM $BlockTable ORDER BY number DESC LIMIT 1"
+      )
       val rs = pstmt.executeQuery()
       val result = if (rs.next()) {
         (rs.getLong(1), rs.getLong(2) * 1000)
@@ -283,13 +301,16 @@ abstract class BlockRepository extends AbstractRepository {
     withDB(BlockBurnsDB) { c =>
       val pstmt =
         c.prepareStatement(
-          s"SELECT `number`,`accumulate_fees`,`accumulate_klay` FROM $BlockBurnTable ORDER BY `number` DESC LIMIT 1")
+          s"SELECT `number`,`accumulate_fees`,`accumulate_klay` FROM $BlockBurnTable ORDER BY `number` DESC LIMIT 1"
+        )
       val rs = pstmt.executeQuery()
       val (blockNumber, accumulateFees, accumulateKlay) =
         if (rs.next())
-          (rs.getLong(1),
-           rs.getString(2).hexToBigInt(),
-           rs.getString(3).hexToBigInt())
+          (
+            rs.getLong(1),
+            rs.getString(2).hexToBigInt(),
+            rs.getString(3).hexToBigInt()
+          )
         else (0L, BigInt(0), BigInt(0))
 
       rs.close()
@@ -301,7 +322,8 @@ abstract class BlockRepository extends AbstractRepository {
   def insertBlockBurns(burns: Seq[BlockBurns]): Unit = {
     withDB(BlockBurnsDB) { c =>
       val pstmt = c.prepareStatement(
-        s"INSERT IGNORE  INTO $BlockBurnTable (`number`,`fees`,`accumulate_fees`,`accumulate_klay`,`timestamp`) VALUES (?,?,?,?,?)")
+        s"INSERT IGNORE  INTO $BlockBurnTable (`number`,`fees`,`accumulate_fees`,`accumulate_klay`,`timestamp`) VALUES (?,?,?,?,?)"
+      )
 
       burns.sortBy(_.number).foreach { burn =>
         pstmt.setLong(1, burn.number)
@@ -325,12 +347,14 @@ abstract class BlockRepository extends AbstractRepository {
     withDB(BlockDB) { c =>
       val pstmt =
         c.prepareStatement(
-          s"SELECT `number`,`base_fee_per_gas`,`gas_used`,`timestamp` FROM $BlockTable WHERE `number` > ? ORDER BY `number` LIMIT 1000")
+          s"SELECT `number`,`base_fee_per_gas`,`gas_used`,`timestamp` FROM $BlockTable WHERE `number` > ? ORDER BY `number` LIMIT 1000"
+        )
       pstmt.setLong(1, maxBlockNumber)
       val rs = pstmt.executeQuery()
       while (rs.next()) {
         blockInfos.append(
-          (rs.getLong(1), rs.getString(2), rs.getInt(3), rs.getInt(4)))
+          (rs.getLong(1), rs.getString(2), rs.getInt(3), rs.getInt(4))
+        )
       }
       rs.close()
       pstmt.close()
@@ -343,7 +367,8 @@ abstract class BlockRepository extends AbstractRepository {
     val burntFees = mutable.ArrayBuffer.empty[(Long, String)]
     withDB(BlockRewardDB) { c =>
       val pstmt = c.prepareStatement(
-        s"SELECT `number`,`burnt_fee` FROM $BlockRewardTable WHERE `number` > ? ORDER BY `number` LIMIT 1000")
+        s"SELECT `number`,`burnt_fee` FROM $BlockRewardTable WHERE `number` > ? ORDER BY `number` LIMIT 1000"
+      )
       pstmt.setLong(1, maxBlockNumber)
       val rs = pstmt.executeQuery()
       while (rs.next()) {
