@@ -1,6 +1,5 @@
 package io.klaytn.utils
 
-import io.klaytn.model.ChainPhase
 import io.klaytn.utils.http.HttpClient
 import io.klaytn.utils.spark.UserConfig
 

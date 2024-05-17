@@ -14,7 +14,7 @@ import io.klaytn.utils.spark.UserConfig
 import io.klaytn.utils.{JsonUtil, SlackUtil}
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.exception.ExceptionUtils
-import java.io.{BufferedWriter, File, FileWriter}
+import java.io.{File}
 
 import java.text.SimpleDateFormat
 import java.util.TimeZone

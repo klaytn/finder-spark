@@ -3,22 +3,11 @@ package io.klaytn.utils.gcs
 import io.klaytn.utils.Utils
 import io.klaytn.utils.spark.UserConfig
 
-import java.io.{InputStreamReader, Reader, InputStream}
+import java.io.{InputStreamReader, Reader}
 import scala.collection.mutable
-import scala.io.Source
-import scala.jdk.CollectionConverters._
-import scala.util.Try
 import java.io.ByteArrayInputStream
 
-import com.google.cloud.storage.{
-  Blob,
-  BlobId,
-  BlobInfo,
-  Bucket,
-  BucketInfo,
-  Storage,
-  StorageOptions
-}
+import com.google.cloud.storage.{BlobId, BlobInfo, Storage, StorageOptions}
 import com.google.cloud.storage.Storage.{BlobListOption, CopyRequest}
 
 object GCSUtil {
@@ -101,7 +90,6 @@ object GCSUtil {
            destinationBucket: String,
            destinationKey: String): Unit = {
     val sourceBlobId = BlobId.of(sourceBucket, sourceKey);
-    val sourceBlob = storage.get(sourceBlobId);
     val targetBlobId = BlobId.of(destinationBucket, destinationKey);
     val targetBlob = storage.get(targetBlobId);
 

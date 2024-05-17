@@ -2,8 +2,7 @@ package io.klaytn.apps.worker
 
 import io.klaytn.client.SparkRedis
 import io.klaytn.utils.SlackUtil
-import io.klaytn.utils.config.FunctionSupport
-import io.klaytn.utils.spark.{KafkaStreamingHelper, UserConfig}
+import io.klaytn.utils.spark.{KafkaStreamingHelper}
 import org.apache.spark.TaskContext
 
 object TokenURIWorkerStreaming extends KafkaStreamingHelper {

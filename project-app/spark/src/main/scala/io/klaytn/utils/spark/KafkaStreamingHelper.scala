@@ -1,6 +1,5 @@
 package io.klaytn.utils.spark
 
-import io.klaytn.utils.SlackUtil
 import io.klaytn.utils.spark.offset.OffsetUtil
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.common.TopicPartition

@@ -2,21 +2,12 @@ package io.klaytn.apps.restore.transaction
 
 import io.klaytn.apps.restore.bulkload.BulkLoadHelper
 import io.klaytn.dsl.db.withDB
-import io.klaytn.model.Block
-import io.klaytn.model.finder.TransferType
 import io.klaytn.utils.spark.SparkHelper
-import io.klaytn.utils.{SlackUtil, Utils}
-import org.apache.commons.lang3.StringUtils
-import org.apache.commons.lang3.exception.ExceptionUtils
-import org.apache.spark.rdd.RDD
+import io.klaytn.utils.{SlackUtil}
 import io.klaytn.persistent.impl.rdb.RDBTransactionPersistentAPI
 import io.klaytn.persistent.impl.rdb.RDBEventLogPersistentAPI
 import io.klaytn.persistent.impl.rdb.RDBBlockPersistentAPI
-import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
 import io.klaytn.model.RefinedEventLog
-import io.klaytn.model.ChainPhase
-import io.klaytn.model.RefinedTransactionReceipt
 import io.klaytn.service.CaverService
 /*
 --driver-memory 10g

@@ -1,17 +1,9 @@
 package io.klaytn.apps.restore.approveBurn
 
 import io.klaytn.apps.restore.bulkload.BulkLoadHelper
-import io.klaytn.dsl.db.withDB
 import io.klaytn.model.Block
-import io.klaytn.model.finder.TransferType
 import io.klaytn.utils.spark.SparkHelper
-import io.klaytn.utils.{SlackUtil, Utils}
-import org.apache.commons.lang3.StringUtils
-import org.apache.commons.lang3.exception.ExceptionUtils
-import org.apache.spark.rdd.RDD
 import io.klaytn.persistent.impl.rdb.RDBEventLogPersistentAPI
-import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
 import io.klaytn.model.RefinedEventLog
 
 /*
