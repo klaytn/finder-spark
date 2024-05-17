@@ -136,6 +136,12 @@ class ContractService(
       case ContractType.KIP37 =>
         Try(caverContractService.getKIP37URI(contractAddress, tokenId))
           .getOrElse("-")
+      case ContractType.ERC721 =>
+        Try(caverContractService.getERC721URI(contractAddress, tokenId))
+          .getOrElse("-")
+      case ContractType.ERC1155 =>
+        Try(caverContractService.getERC1155URI(contractAddress, tokenId))
+          .getOrElse("-")
       case _ => "-"
     }
     if (uri.contains("{id}")) {

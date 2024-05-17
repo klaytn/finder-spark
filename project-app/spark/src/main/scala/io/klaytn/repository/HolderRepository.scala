@@ -122,7 +122,7 @@ abstract class HolderRepository(
   ): Seq[(NFTInventories, ContractType.Value)] = {
     withDB(NFTHolderDB) { c =>
       val pstmt = c.prepareStatement(
-        s"SELECT `contract_address`,`holder_address`,`token_id`,`token_uri`,`last_transaction_time`, `contract_type` FROM $NFTInventoriesTable WHERE `id` BETWEEN ? AND ?"
+        s"SELECT `contract_address`,`holder_address`,`token_id`,`token_uri`,`last_transaction_time`, `contract_type` FROM $NFTInventoriesTable WHERE `id` BETWEEN ? AND ? AND `token_uri` = '-'"
       )
 
       pstmt.setLong(1, startId)
@@ -137,7 +137,11 @@ abstract class HolderRepository(
               isSend = false,
               contractAddress = rs.getString(1),
               holderAddress = rs.getString(2),
-              tokenId = BigInt(rs.getString(3)),
+              tokenId = try {
+                BigInt(rs.getString(3))
+              } catch {
+                case _: Throwable => BigInt(-1)
+              },
               uri = rs.getString(4),
               timestamp = rs.getInt(5)
             ),
@@ -148,8 +152,7 @@ abstract class HolderRepository(
 
       rs.close()
       pstmt.close()
-
-      result
+      result.filter(_._1.tokenId != BigInt(-1))
     }
   }
 
