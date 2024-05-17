@@ -153,6 +153,9 @@ You can find the file in the following path.
 ./release.sh finder-batch-prod io.klaytn.apps.restore.blockBurn.BlockBurn baobab --build
 ./release.sh finder-batch-prod io.klaytn.apps.restore.blockBurn.BlockBurn cypress --build
 
+./release.sh finder-batch-prod io.klaytn.apps.restore.tokenURI.TokenURI baobab --build
+./release.sh finder-batch-prod io.klaytn.apps.restore.tokenURI.TokenURI cypress --build
+
 ./release.sh finder-batch-prod io.klaytn.apps.restore.transaction.TransactionRestoreBatch cypress --build
 ./release.sh finder-batch-prod io.klaytn.apps.restore.transaction.TransactionRestoreBatch baobab --build
 
@@ -178,6 +181,9 @@ You can find the file in the following path.
 
 ./release.sh finder-streaming-prod io.klaytn.apps.worker.NFTWorkerStreaming cypress --build
 ./release.sh finder-streaming-prod io.klaytn.apps.worker.NFTWorkerStreaming baobab --build
+
+./release.sh finder-streaming-prod io.klaytn.apps.worker.TokenURIWorkerStreaming cypress --build
+./release.sh finder-streaming-prod io.klaytn.apps.worker.TokenURIWorkerStreaming baobab --build
 
 ./release.sh finder-streaming-prod io.klaytn.apps.worker.SlowWorkerStreaming cypress --build
 ./release.sh finder-streaming-prod io.klaytn.apps.worker.SlowWorkerStreaming baobab --build

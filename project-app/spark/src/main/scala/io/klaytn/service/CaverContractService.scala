@@ -57,9 +57,16 @@ class CaverContractService(caver: LazyEval[Caver]) extends Serializable {
     val reader = new KIP17MetadataReader(caver)
     reader.tokenURI(contractAddress, tokenId.bigInteger).getOrElse("-")
   }
-
+  def getERC721URI(contractAddress: String, tokenId: BigInt): String = {
+    val reader = new ERC721MetadataReader(caver)
+    reader.tokenURI(contractAddress, tokenId.bigInteger).getOrElse("-")
+  }
   def getKIP37URI(contractAddress: String, id: BigInt): String = {
     val reader = new KIP37MetadataReader(caver)
+    reader.uri(contractAddress, id.bigInteger).getOrElse("-")
+  }
+  def getERC1155URI(contractAddress: String, id: BigInt): String = {
+    val reader = new ERC1155MetadataReader(caver)
     reader.uri(contractAddress, id.bigInteger).getOrElse("-")
   }
 

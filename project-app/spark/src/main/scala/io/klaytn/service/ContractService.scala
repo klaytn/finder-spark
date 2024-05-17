@@ -136,12 +136,24 @@ class ContractService(
       case ContractType.KIP37 =>
         Try(caverContractService.getKIP37URI(contractAddress, tokenId))
           .getOrElse("-")
+      case ContractType.ERC721 =>
+        Try(caverContractService.getERC721URI(contractAddress, tokenId))
+          .getOrElse("-")
+      case ContractType.ERC1155 =>
+        Try(caverContractService.getERC1155URI(contractAddress, tokenId))
+          .getOrElse("-")
       case _ => "-"
     }
     if (uri.contains("{id}")) {
       holderPersistentAPI.insertNFTPatternedUri(contractAddress, uri)
     }
     uri.replace("{id}", tokenId.toString())
+
+    if (uri != null && uri.length <= 255) {
+      uri
+    } else {
+      "-"
+    }
   }
 
   def applyDecimal(raw: BigDecimal, decimal: Int): BigDecimal = {

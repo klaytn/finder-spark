@@ -3,15 +3,16 @@ package io.klaytn.apps.worker
 import io.klaytn.client.SparkRedis
 import io.klaytn.utils.SlackUtil
 import io.klaytn.utils.spark.{KafkaStreamingHelper}
+import org.apache.spark.TaskContext
 
-object NFTWorkerStreaming extends KafkaStreamingHelper {
-  import NFTWorkerStreamingDeps._
+object TokenURIWorkerStreaming extends KafkaStreamingHelper {
+  import TokenURIWorkerStreamingDeps._
 
-  def nftHolder(): Unit = {
-    val redisKey = "NFTWorkerStreaming:nftHolder"
+  def tokenURI(): Unit = {
+    val redisKey = "TokenURIWorkerStreaming:tokenURI"
     if (SparkRedis.get(redisKey).isEmpty) {
       SparkRedis.setex(redisKey, 3600, "run")
-      holderService.procNFTHolder()
+      holderService.procTokenURI(spark)
       SparkRedis.del(redisKey)
     }
   }
@@ -20,10 +21,10 @@ object NFTWorkerStreaming extends KafkaStreamingHelper {
     stream().foreachRDD { rdd =>
       if (!rdd.isEmpty()) {
         val s1 = System.currentTimeMillis()
-        nftHolder()
+        tokenURI()
         val s2 = System.currentTimeMillis()
         if (s2 - s1 > 3000) {
-          SlackUtil.sendMessage(s"NFTWorker: ${s2 - s1}")
+          SlackUtil.sendMessage(s"TokenURIWorker: ${s2 - s1}")
         }
         writeOffsetAndClearCache(rdd)
       }

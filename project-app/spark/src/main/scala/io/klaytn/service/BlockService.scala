@@ -14,7 +14,6 @@ import io.klaytn.persistent.{
   EventLogPersistentAPI,
   TransactionPersistentAPI
 }
-import scala.util.Try
 import io.klaytn.repository.{BlockBurns, BlockReward}
 import io.klaytn.utils.config.Constants
 import io.klaytn.utils.config.FunctionSupport
