@@ -32,4 +32,5 @@ trait BlockPersistentAPI extends Serializable {
   def insertBlockBurns(burns: Seq[BlockBurns]): Unit
   def findBlockFeeInfos(maxBlockNumber: Long): Seq[(Long, String, Int, Int)]
   def findBurntFeesOfBlockRewards(maxBlockNumber: Long): Map[Long, String]
+  def getBlocksByRange(from: Long, to: Long): Seq[RefinedBlock]
 }

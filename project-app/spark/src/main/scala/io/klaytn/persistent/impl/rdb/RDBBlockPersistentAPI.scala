@@ -66,4 +66,8 @@ class RDBBlockPersistentAPI() extends BlockRepository with BlockPersistentAPI {
       maxBlockNumber: Long): Map[Long, String] = {
     super.findBurntFeesOfBlockRewards(maxBlockNumber)
   }
+
+  override def getBlocksByRange(from: Long, to: Long): Seq[RefinedBlock] = {
+    super.getBlocksByRange(from, to)
+  }
 }

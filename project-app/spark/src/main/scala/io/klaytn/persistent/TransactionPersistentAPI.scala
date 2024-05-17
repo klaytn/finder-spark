@@ -21,4 +21,7 @@ trait TransactionPersistentAPI extends Serializable {
   def insertTransactionReceipts(block: Block): Unit
   def getMismatchingBlocks(startNum: Long, endNum: Long): List[Long]
   def getMissingBlocks(startNum: Long, endNum: Long): List[Long]
+  def getTransactionReceiptsByBlockRange(
+      startNum: Long,
+      endNum: Long): Seq[RefinedTransactionReceipt]
 }
