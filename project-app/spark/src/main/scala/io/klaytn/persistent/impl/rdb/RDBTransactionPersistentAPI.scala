@@ -30,4 +30,10 @@ class RDBTransactionPersistentAPI
   override def getMissingBlocks(startNum: Long, endNum: Long): List[Long] = {
     super.getMissingBlocks(startNum, endNum)
   }
+
+  override def getTransactionReceiptsByBlockRange(
+      startNum: Long,
+      endNum: Long): Seq[RefinedTransactionReceipt] = {
+    super.getTransactionReceiptsByBlockRange(startNum, endNum)
+  }
 }

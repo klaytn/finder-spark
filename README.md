@@ -156,6 +156,9 @@ You can find the file in the following path.
 ./release.sh finder-batch-prod io.klaytn.apps.restore.tokenURI.TokenURI baobab --build
 ./release.sh finder-batch-prod io.klaytn.apps.restore.tokenURI.TokenURI cypress --build
 
+./release.sh finder-batch-prod io.klaytn.apps.restore.account.AccountRestore baobab --build
+./release.sh finder-batch-prod io.klaytn.apps.restore.account.AccountRestore cypress --build
+
 ./release.sh finder-batch-prod io.klaytn.apps.restore.transaction.TransactionRestoreBatch cypress --build
 ./release.sh finder-batch-prod io.klaytn.apps.restore.transaction.TransactionRestoreBatch baobab --build
 

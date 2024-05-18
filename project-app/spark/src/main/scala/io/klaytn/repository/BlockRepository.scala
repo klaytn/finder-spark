@@ -3,7 +3,7 @@ package io.klaytn.repository
 import io.klaytn.dsl.db.withDB
 import io.klaytn.model.RefinedBlock
 import io.klaytn.utils.klaytn.NumberConverter.{BigIntConverter, StringConverter}
-
+import io.klaytn.utils.Utils
 import java.text.SimpleDateFormat
 import java.util.TimeZone
 import scala.collection.mutable
@@ -379,4 +379,51 @@ abstract class BlockRepository extends AbstractRepository {
     }
     burntFees.toMap
   }
+
+  def getBlocksByRange(from: Long, to: Long): Seq[RefinedBlock] = {
+    withDB(BlockDB) { c =>
+      val pstmt = c.prepareStatement(
+        s"SELECT * FROM $BlockTable b WHERE b.`number` BETWEEN ? and ?"
+      )
+      pstmt.setLong(1, from)
+      pstmt.setLong(2, to)
+      val rs = pstmt.executeQuery()
+
+      val blocks = ArrayBuffer.empty[RefinedBlock]
+      while (rs.next()) {
+        val block = RefinedBlock(
+          "blocks",
+          Utils.getBlockNumberPartition(rs.getLong("number")),
+          Option(rs.getString("base_fee_per_gas")),
+          Option(rs.getInt("block_score")),
+          Option(rs.getString("committee")).getOrElse("[]").split(",").toList,
+          rs.getString("extra_data"),
+          rs.getInt("gas_used"),
+          Option(rs.getString("governance_data")),
+          rs.getString("hash"),
+          rs.getString("logs_bloom"),
+          rs.getLong("number"),
+          rs.getString("parent_hash"),
+          Option(rs.getString("proposer")),
+          rs.getString("receipts_root"),
+          rs.getString("reward"),
+          rs.getInt("size"),
+          rs.getString("state_root"),
+          rs.getInt("timestamp"),
+          rs.getInt("timestamp_fos"),
+          rs.getInt("total_block_score"),
+          rs.getString("transactions_root"),
+          rs.getString("vote_data"),
+          rs.getInt("transaction_count")
+        )
+
+        blocks.append(block)
+      }
+      rs.close()
+      pstmt.close()
+
+      blocks
+    }
+  }
+
 }

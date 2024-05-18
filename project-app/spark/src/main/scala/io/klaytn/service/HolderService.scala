@@ -17,37 +17,33 @@ import io.klaytn.model.finder.NFTTransfer
 import scala.collection.mutable
 import org.apache.spark.sql.SparkSession
 
-class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
-                    transferPersistentAPI: LazyEval[TransferPersistentAPI],
-                    contractService: LazyEval[ContractService],
-                    nftItemService: LazyEval[NFTItemService],
-                    transferService: LazyEval[TransferService])
-    extends Serializable {
+class HolderService(
+    holderPersistentAPI: LazyEval[HolderPersistentAPI],
+    transferPersistentAPI: LazyEval[TransferPersistentAPI],
+    contractService: LazyEval[ContractService],
+    nftItemService: LazyEval[NFTItemService],
+    transferService: LazyEval[TransferService]
+) extends Serializable {
 
   object NFTProcFlags extends Enumeration {
 
-    /**
-      * Managed in Redis, S3
+    /** Managed in Redis, S3
       */
     val redis = ("HolderService:NFT:LastBlock")
 
-    /**
-      * Managed in RDS
+    /** Managed in RDS
       */
     val holder = ("HolderService:NFT:Holder:LastBlock")
 
-    /**
-      * Managed in RDS
+    /** Managed in RDS
       */
     val inventory = ("HolderService:NFT:Inventory:LastBlock")
 
-    /**
-      * Managed in Redis, S3
+    /** Managed in Redis, S3
       */
     val tokenURI = ("HolderService:NFT:TokenURI:LastBlock")
 
-    /**
-      * Managed in Redis, S3
+    /** Managed in Redis, S3
       */
     val account = ("HolderService:NFT:Account:LastBlock")
   }
@@ -58,11 +54,13 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
     GCSUtil.writeText(UserConfig.baseBucket, s3Key, data)
   }
 
-  def calAmount(m: mutable.Map[String, (BigInt, Int, Long)],
-                key: String,
-                amount: BigInt,
-                ts: Int,
-                blockNumber: Long): Unit = {
+  def calAmount(
+      m: mutable.Map[String, (BigInt, Int, Long)],
+      key: String,
+      amount: BigInt,
+      ts: Int,
+      blockNumber: Long
+  ): Unit = {
     val v = m.getOrElseUpdate(key, (BigInt(0), 0, 0L))
     val (oldAmount, oldTs, oldBlockNumber) = (v._1, v._2, v._3)
 
@@ -97,17 +95,21 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
     tokenTransfers.foreach { t =>
       val amount = t.amount.hexToBigInt()
       if (Constants.nonZeroOrDead(t.from)) {
-        calAmount(m,
-                  s"${t.contractAddress}\t${t.from}",
-                  -amount,
-                  t.timestamp,
-                  t.blockNumber)
+        calAmount(
+          m,
+          s"${t.contractAddress}\t${t.from}",
+          -amount,
+          t.timestamp,
+          t.blockNumber
+        )
       }
-      calAmount(m,
-                s"${t.contractAddress}\t${t.to}",
-                amount,
-                t.timestamp,
-                t.blockNumber)
+      calAmount(
+        m,
+        s"${t.contractAddress}\t${t.to}",
+        amount,
+        t.timestamp,
+        t.blockNumber
+      )
 
       contractAddresses.add(t.contractAddress)
     }
@@ -122,7 +124,8 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
     }.toSeq
 
     holderPersistentAPI.insertTokenHolders(
-      holders.filter(x => !isZeroOrDead(x.holderAddress)))
+      holders.filter(x => !isZeroOrDead(x.holderAddress))
+    )
 
     contractAddresses.foreach { address: String =>
       contractService.checkContractAndUpdate(address, "token")
@@ -130,14 +133,18 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
 
     val accountTransferContracts = tokenTransfers.flatMap { t =>
       Seq(
-        AccountTransferContracts(t.from,
-                                 t.contractAddress,
-                                 t.timestamp,
-                                 TransferType.TOKEN),
-        AccountTransferContracts(t.to,
-                                 t.contractAddress,
-                                 t.timestamp,
-                                 TransferType.TOKEN)
+        AccountTransferContracts(
+          t.from,
+          t.contractAddress,
+          t.timestamp,
+          TransferType.TOKEN
+        ),
+        AccountTransferContracts(
+          t.to,
+          t.contractAddress,
+          t.timestamp,
+          TransferType.TOKEN
+        )
       )
     }
     transferService.insertAccountTransferContracts(accountTransferContracts)
@@ -164,20 +171,24 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
       .filter(x => x.contractType == KIP17 || x.contractType == ERC721)
       .flatMap { x =>
         Seq(
-          NFTHolders(x.contractAddress,
-                     x.from,
-                     x.tokenId,
-                     -x.tokenCount.hexToBigInt(),
-                     "-",
-                     x.timestamp,
-                     x.blockNumber),
-          NFTHolders(x.contractAddress,
-                     x.to,
-                     x.tokenId,
-                     x.tokenCount.hexToBigInt(),
-                     "-",
-                     x.timestamp,
-                     x.blockNumber)
+          NFTHolders(
+            x.contractAddress,
+            x.from,
+            x.tokenId,
+            -x.tokenCount.hexToBigInt(),
+            "-",
+            x.timestamp,
+            x.blockNumber
+          ),
+          NFTHolders(
+            x.contractAddress,
+            x.to,
+            x.tokenId,
+            x.tokenCount.hexToBigInt(),
+            "-",
+            x.timestamp,
+            x.blockNumber
+          )
         )
       }
 
@@ -193,18 +204,22 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
 //      nftItems((x.contractAddress, x.tokenId)) = (v._1 + 1, x.contractType, uri)
 
         Seq(
-          NFTInventories(isSend = true,
-                         x.contractAddress,
-                         x.from,
-                         x.tokenId,
-                         uri,
-                         x.timestamp),
-          NFTInventories(isSend = false,
-                         x.contractAddress,
-                         x.to,
-                         x.tokenId,
-                         uri,
-                         x.timestamp)
+          NFTInventories(
+            isSend = true,
+            x.contractAddress,
+            x.from,
+            x.tokenId,
+            uri,
+            x.timestamp
+          ),
+          NFTInventories(
+            isSend = false,
+            x.contractAddress,
+            x.to,
+            x.tokenId,
+            uri,
+            x.timestamp
+          )
         )
       }
 
@@ -220,20 +235,24 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
 //      nftItems((x.contractAddress, x.tokenId)) = (v._1 + 1, x.contractType, uri)
 
         Seq(
-          NFTHolders(x.contractAddress,
-                     x.from,
-                     x.tokenId,
-                     -x.tokenCount.hexToBigInt(),
-                     uri,
-                     x.timestamp,
-                     x.blockNumber),
-          NFTHolders(x.contractAddress,
-                     x.to,
-                     x.tokenId,
-                     x.tokenCount.hexToBigInt(),
-                     uri,
-                     x.timestamp,
-                     x.blockNumber)
+          NFTHolders(
+            x.contractAddress,
+            x.from,
+            x.tokenId,
+            -x.tokenCount.hexToBigInt(),
+            uri,
+            x.timestamp,
+            x.blockNumber
+          ),
+          NFTHolders(
+            x.contractAddress,
+            x.to,
+            x.tokenId,
+            x.tokenCount.hexToBigInt(),
+            uri,
+            x.timestamp,
+            x.blockNumber
+          )
         )
       }
 
@@ -262,14 +281,18 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
 
     val accountTransferContracts = nftTransfers.flatMap { t =>
       Seq(
-        AccountTransferContracts(t.from,
-                                 t.contractAddress,
-                                 t.timestamp,
-                                 TransferType.NFT),
-        AccountTransferContracts(t.to,
-                                 t.contractAddress,
-                                 t.timestamp,
-                                 TransferType.NFT)
+        AccountTransferContracts(
+          t.from,
+          t.contractAddress,
+          t.timestamp,
+          TransferType.NFT
+        ),
+        AccountTransferContracts(
+          t.to,
+          t.contractAddress,
+          t.timestamp,
+          TransferType.NFT
+        )
       )
     }
 
@@ -278,8 +301,7 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
     SparkRedis.set(redisKey, s"${nftTransfers.map(_.id.getOrElse(0L)).max}")
   }
 
-  /**
-    * Call proc_nft_holder_aggregate
+  /** Call proc_nft_holder_aggregate
     * @deprecated
     * @param procNum
     */
@@ -305,8 +327,7 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
     }
   }
 
-  /**
-    * Call proc_nft_inven_aggregate
+  /** Call proc_nft_inven_aggregate
     * @deprecated
     * @param procNum
     */
@@ -332,8 +353,7 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
     }
   }
 
-  /**
-    * Set is_running flag to false
+  /** Set is_running flag to false
     * @deprecated
     * @param jobName
     */
@@ -370,8 +390,7 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
 
   }
 
-  /**
-    * Get is_running from nft_aggregate_flag
+  /** Get is_running from nft_aggregate_flag
     * @deprecated
     * @param jobName
     * @return
@@ -398,8 +417,7 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
     isRunning
   }
 
-  /**
-    * Insert account transfer contracts
+  /** Insert account transfer contracts
     *
     * @param procNum
     * @return
@@ -445,14 +463,18 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
     // Make two account transfer contracts for each transfer
     val accountTransferContracts = nftTransfers.flatMap { t =>
       Seq(
-        AccountTransferContracts(t.from,
-                                 t.contractAddress,
-                                 t.timestamp,
-                                 TransferType.NFT),
-        AccountTransferContracts(t.to,
-                                 t.contractAddress,
-                                 t.timestamp,
-                                 TransferType.NFT)
+        AccountTransferContracts(
+          t.from,
+          t.contractAddress,
+          t.timestamp,
+          TransferType.NFT
+        ),
+        AccountTransferContracts(
+          t.to,
+          t.contractAddress,
+          t.timestamp,
+          TransferType.NFT
+        )
       )
     }
     transferService.insertAccountTransferContracts(accountTransferContracts)
@@ -479,8 +501,7 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
     }
   }
 
-  /**
-    * Get Token URI from caver and update tokenURI in nft_inventories
+  /** Get Token URI from caver and update tokenURI in nft_inventories
     * @param procNum
     * @return
     */
@@ -589,8 +610,10 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
       val newTokenURI =
         contractService.getFreshTokenURI(contractType, contractAddress, tokenId)
       if (newTokenURI != null && newTokenURI.length <= 255) {
-        tokens.put((contractAddress, tokenId.toString, contractType),
-                   newTokenURI)
+        tokens.put(
+          (contractAddress, tokenId.toString, contractType),
+          newTokenURI
+        )
       }
     })
     // (contractAddress, tokenId, tokenUri)
@@ -607,8 +630,7 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
     return endId
   }
 
-  /**
-    * @deprecated
+  /** @deprecated
     * @param diff
     * @param procNum
     */
@@ -623,8 +645,7 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
     }
   }
 
-  /**
-    * @deprecated
+  /** @deprecated
     * @param diff
     * @param procNum
     */
@@ -639,16 +660,17 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
     }
   }
 
-  /**
-    * @deprecated
+  /** @deprecated
     * @param startId
     * @param diff
     * @param procNum
     * @return
     */
-  def catchUpAccountTransferContracts(startId: Long,
-                                      diff: Long,
-                                      procNum: Long) = {
+  def catchUpAccountTransferContracts(
+      startId: Long,
+      diff: Long,
+      procNum: Long
+  ) = {
     val chunk = (diff / procNum).floor.abs.toInt
     if (chunk >= 1) {
       Range.inclusive(1, chunk).foreach { x =>
@@ -697,8 +719,10 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
         SparkRedis.set(NFTProcFlags.redis, accountProc.toString())
         s4 = System.currentTimeMillis()
       } else if (accountProc <= redisProc) {
-        logs.put("Redis is up to date",
-                 s"accountProc(${accountProc}) <= redisProcId(${redisProc})")
+        logs.put(
+          "Redis is up to date",
+          s"accountProc(${accountProc}) <= redisProcId(${redisProc})"
+        )
       }
       logs.put("Finish procNFTStates", s"${s4 - s3} ms")
       logs.put("Total time", s"${s4 - s1} ms")
@@ -707,12 +731,14 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
       val message =
         s"""[ProcNFT logs]\n${logString}\n\n[ProcNFT states]\n inventoryProc: ${inventoryProc}\n holderProc: ${holderProc}\n accountProc: ${accountProc} \n tokenURIProc: ${tokenURIProc}\n redisProc: ${redisProc}\n newRedisProc: ${List(
           accountProc,
-          redisProc).max.toString()}"""
+          redisProc
+        ).max.toString()}"""
       SlackUtil.sendMessage(message)
     } catch {
       case e: Exception =>
         SlackUtil.sendMessage(
-          s"procNFT() Error! ${e.getMessage} ${e.getStackTrace.mkString("\n")}")
+          s"procNFT() Error! ${e.getMessage} ${e.getStackTrace.mkString("\n")}"
+        )
         Thread.sleep(5000)
     }
   }
@@ -728,7 +754,8 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
   def getNFTAggregateFlagFromDB(jobName: String): Long = {
     withDB("finder03") { c =>
       val pstmt = c.prepareStatement(
-        s"SELECT last_id from nft_aggregate_flag where job_name = '${jobName}'")
+        s"SELECT last_id from nft_aggregate_flag where job_name = '${jobName}'"
+      )
       val rs = pstmt.executeQuery()
       pstmt.close()
       var result = 0L
@@ -751,7 +778,8 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
     val lastProcIdMap = mutable.Map.empty[String, Long]
     withDB("finder03") { c =>
       val pstmt = c.prepareStatement(
-        s"SELECT job_name, last_id from nft_aggregate_flag where job_name in ('${NFTProcFlags.holder}', '${NFTProcFlags.inventory}')")
+        s"SELECT job_name, last_id from nft_aggregate_flag where job_name in ('${NFTProcFlags.holder}', '${NFTProcFlags.inventory}')"
+      )
       val rs = pstmt.executeQuery()
       while (rs.next()) {
         lastProcIdMap.put(rs.getString(1), rs.getLong(2))
@@ -759,14 +787,16 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
       rs.close()
       pstmt.close()
     }
-    lastProcIdMap.size == 2 && lastProcIdMap(NFTProcFlags.holder) == lastProcIdMap(
-      NFTProcFlags.inventory)
+    lastProcIdMap.size == 2 && lastProcIdMap(
+      NFTProcFlags.holder
+    ) == lastProcIdMap(NFTProcFlags.inventory)
   }
 
   def checkNFTAggregateFlagInitalized(): Boolean = {
     withDB("finder03") { c =>
       val pstmt = c.prepareStatement(
-        s"SELECT count(*) from nft_aggregate_flag where job_name in ('${NFTProcFlags.holder}', '${NFTProcFlags.inventory}')")
+        s"SELECT count(*) from nft_aggregate_flag where job_name in ('${NFTProcFlags.holder}', '${NFTProcFlags.inventory}')"
+      )
       val count = pstmt.executeQuery().getInt(1)
       pstmt.close()
       count == 2
@@ -777,7 +807,8 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
       val pstmt = c.prepareStatement(
         s"INSERT IGNORE INTO nft_aggregate_flag (job_name, last_id, is_running) " +
           s"VALUES ('${NFTProcFlags.holder}', 0, 0)" +
-          s"('${NFTProcFlags.inventory}', 0, 0)")
+          s"('${NFTProcFlags.inventory}', 0, 0)"
+      )
       pstmt.executeUpdate()
     }
   }
@@ -787,7 +818,8 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
 
     withDB("finder03") { c =>
       val pstmt = c.prepareStatement(
-        "select contract_address, count(*) from nft_holders group by contract_address")
+        "select contract_address, count(*) from nft_holders group by contract_address"
+      )
       val rs = pstmt.executeQuery()
       while (rs.next()) {
         holderCount.put(rs.getString(1), rs.getLong(2))
@@ -796,10 +828,12 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
       pstmt.close()
 
       val pstmt2 =
-        c.prepareStatement(s"""select contract_address, sum(cnt) from (
+        c.prepareStatement(
+          s"""select contract_address, sum(cnt) from (
                                          |select contract_address, token_id, count(*) cnt from nft_inventories
                                          |where contract_type = 3 and holder_address != '${Constants.ZeroAddress}'
-                                         |group by contract_address, token_id) a group by contract_address""".stripMargin)
+                                         |group by contract_address, token_id) a group by contract_address""".stripMargin
+        )
       val rs2 = pstmt2.executeQuery()
       while (rs2.next()) {
         holderCount.put(rs2.getString(1), rs2.getLong(2))
@@ -812,7 +846,8 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
       withDB(ContractRepository.ContractDB) { c =>
         val pstmt =
           c.prepareStatement(
-            "UPDATE `contracts` SET `holder_count`=? WHERE `contract_address`=?")
+            "UPDATE `contracts` SET `holder_count`=? WHERE `contract_address`=?"
+          )
         grouped.foreach {
           case (k, v) =>
             pstmt.setLong(1, v)
@@ -835,12 +870,15 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
       transferPersistentAPI.getNFTTransfers(tableId, 2000).sortBy(_.timestamp)
 
     if (nftTransfers.isEmpty) return
-    // Parrallelize
+    val totalTokenURIs =
+      scala.collection.mutable.ListBuffer.empty[(String, String, String)]
     val nftTransfersRDD = spark.sparkContext.parallelize(nftTransfers, 20)
-    nftTransfersRDD.foreachPartition { partition =>
-      try {
-        val tokenURIs = partition
-          .map { (x) =>
+    nftTransfersRDD
+      .mapPartitions { partition =>
+        val tokenURIs =
+          scala.collection.mutable.ListBuffer.empty[(String, String, String)]
+        partition
+          .foreach { (x) =>
             val contractAddress = x.contractAddress
             val tokenId = x.tokenId
             val tokenURI =
@@ -849,18 +887,21 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
                 contractAddress,
                 tokenId
               )
-            (contractAddress, tokenId.toString, tokenURI)
+            if (tokenURI != "-") {
+              val t = (contractAddress, tokenId.toString, tokenURI)
+              tokenURIs += t
+            }
           }
-          .toSeq
-          .filter(_._3 != "-")
-        if (tokenURIs.nonEmpty)
-          holderPersistentAPI.updateTokenUriBulk(tokenURIs)
-      } catch {
-        case e: Exception =>
-          SlackUtil.sendMessage(
-            s"procTokenURI() Error! ${e.getMessage} ${e.getStackTrace.mkString("\n")}")
-          throw e
+        tokenURIs.iterator
+
       }
+      .collect()
+      .foreach { x: (String, String, String) =>
+        totalTokenURIs += x
+      }
+
+    totalTokenURIs.toSeq.grouped(1000).foreach { x =>
+      holderPersistentAPI.updateTokenUriBulk(x)
     }
     SparkRedis.set(redisKey, s"${nftTransfers.map(_.id.getOrElse(0L)).max}")
   }
@@ -919,11 +960,12 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
       val (amount1, count1) =
         nftItems.getOrElseUpdate(
           (nftBurn.contractAddress, nftBurn.tokenId, nftBurn.contractType),
-          (BigInt(0), 0))
+          (BigInt(0), 0)
+        )
 
       nftItems(
-        (nftBurn.contractAddress, nftBurn.tokenId, nftBurn.contractType)) =
-        (amount1 + nftBurn.tokenCount.hexToBigInt(), count1 + 1)
+        (nftBurn.contractAddress, nftBurn.tokenId, nftBurn.contractType)
+      ) = (amount1 + nftBurn.tokenCount.hexToBigInt(), count1 + 1)
     }
 
     result.foreach {
@@ -933,22 +975,28 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
 
     if (FunctionSupport.nftItems(UserConfig.chainPhase)) {
       nftItems.foreach {
-        case ((contractAddress, tokenId, contractType),
-              (burnAmount, totalBurns)) =>
-          nftItemService.updateBurn(contractAddress,
-                                    contractType,
-                                    tokenId,
-                                    burnAmount,
-                                    totalBurns)
+        case (
+            (contractAddress, tokenId, contractType),
+            (burnAmount, totalBurns)
+            ) =>
+          nftItemService.updateBurn(
+            contractAddress,
+            contractType,
+            tokenId,
+            burnAmount,
+            totalBurns
+          )
       }
     }
 
     SparkRedis.set(redisKey, s"${burns.map(_.id.getOrElse(0L)).max}")
   }
 
-  private def enqueueCorrectTokenHolder(queueRedisKey: String,
-                                        dequeueData: Seq[(String, String)],
-                                        nowScore: Long): Unit = {
+  private def enqueueCorrectTokenHolder(
+      queueRedisKey: String,
+      dequeueData: Seq[(String, String)],
+      nowScore: Long
+  ): Unit = {
     val tokenHolderTableId =
       SparkRedis.get("HolderService:Token:LastBlock") match {
         case Some(info) => info.toLong
@@ -1005,13 +1053,17 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
               .getOrElse(BigInt(0))
 
             if (chainAmount != dbAmount) {
-              holderPersistentAPI.updateTokenBalance(contractAddress,
-                                                     holderAddress,
-                                                     chainAmount)
-              holderPersistentAPI.insertCorrectHolderHistory(contractAddress,
-                                                             holderAddress,
-                                                             chainAmount,
-                                                             dbAmount)
+              holderPersistentAPI.updateTokenBalance(
+                contractAddress,
+                holderAddress,
+                chainAmount
+              )
+              holderPersistentAPI.insertCorrectHolderHistory(
+                contractAddress,
+                holderAddress,
+                chainAmount,
+                dbAmount
+              )
               FinderRedis.del(s"cache/token-holder::$id")
             }
           } catch { case _: Throwable => }
@@ -1023,15 +1075,19 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
     else
       SparkRedis.zrem(queueRedisKey, dequeueData.map(d => s"${d._1}\t${d._2}"))
 
-    contractService.updateHolderCount(dequeueData.map(_._1).distinct,
-                                      isToken = true)
+    contractService.updateHolderCount(
+      dequeueData.map(_._1).distinct,
+      isToken = true
+    )
 
     enqueueCorrectTokenHolder(queueRedisKey, dequeueData, nowScore)
   }
 
-  private def enqueueCorrectNFTHolder(queueRedisKey: String,
-                                      dequeueData: Seq[(String, String)],
-                                      nowScore: Long): Unit = {
+  private def enqueueCorrectNFTHolder(
+      queueRedisKey: String,
+      dequeueData: Seq[(String, String)],
+      nowScore: Long
+  ): Unit = {
     val nftHolderTableId = SparkRedis.get("HolderService:NFT:LastBlock") match {
       case Some(info) => info.toLong
       case _          => return
@@ -1097,16 +1153,21 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
                   .getOrElse(BigInt(0))
               else
                 throw new RuntimeException(
-                  s"'$contractAddress' is not kip17(erc721).")
+                  s"'$contractAddress' is not kip17(erc721)."
+                )
 
             if (chainAmount != dbAmount) {
-              holderPersistentAPI.updateNFTBalance(contractAddress,
-                                                   holderAddress,
-                                                   chainAmount)
-              holderPersistentAPI.insertCorrectHolderHistory(contractAddress,
-                                                             holderAddress,
-                                                             chainAmount,
-                                                             dbAmount)
+              holderPersistentAPI.updateNFTBalance(
+                contractAddress,
+                holderAddress,
+                chainAmount
+              )
+              holderPersistentAPI.insertCorrectHolderHistory(
+                contractAddress,
+                holderAddress,
+                chainAmount,
+                dbAmount
+              )
               FinderRedis.del(s"cache/nft-holder::$id")
             }
           } catch {
@@ -1120,8 +1181,10 @@ class HolderService(holderPersistentAPI: LazyEval[HolderPersistentAPI],
     else
       SparkRedis.zrem(queueRedisKey, dequeueData.map(d => s"${d._1}\t${d._2}"))
 
-    contractService.updateHolderCount(dequeueData.map(_._1).distinct,
-                                      isToken = false)
+    contractService.updateHolderCount(
+      dequeueData.map(_._1).distinct,
+      isToken = false
+    )
 
     enqueueCorrectNFTHolder(queueRedisKey, dequeueData, nowScore)
   }

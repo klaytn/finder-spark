@@ -4,7 +4,12 @@ import com.github.benmanes.caffeine.cache.{Cache, Caffeine}
 import io.klaytn._
 import io.klaytn.client.FinderRedis
 import io.klaytn.model.finder.{AccountType, Contract, ContractType}
-import io.klaytn.model.{Block, RefinedBlock, RefinedEventLog}
+import io.klaytn.model.{
+  Block,
+  RefinedBlock,
+  RefinedEventLog,
+  RefinedTransactionReceipt
+}
 import io.klaytn.persistent.AccountPersistentAPI
 import io.klaytn.utils._
 import io.klaytn.utils.klaytn.NumberConverter._
@@ -221,9 +226,15 @@ class AccountService(
 
   def processWithoutSave(blocks: RDD[Block],
                          numPartitions: Int): RDD[(String, String, Int)] = {
-    blocks
-      .flatMap { block =>
-        val refinedData = block.toRefined
+    _processWithoutSave(blocks.map(_.toRefined), numPartitions)
+  }
+
+  def _processWithoutSave(
+      refinedBlock: RDD[
+        (RefinedBlock, List[RefinedTransactionReceipt], List[RefinedEventLog])],
+      numPartitions: Int): RDD[(String, String, Int)] = {
+    refinedBlock
+      .flatMap { refinedData =>
         val (refinedBlock, refinedTransactionReceipts, refinedEventLogs) =
           (refinedData._1, refinedData._2, refinedData._3)
 
@@ -343,6 +354,14 @@ class AccountService(
 
   def process(blocks: RDD[Block], numPartitions: Int): Unit = {
     processWithoutSave(blocks, numPartitions)
-      .foreachPartition(procAccount)
+      .foreachPartition(procAccount _)
+  }
+
+  def processRefined(
+      blocks: RDD[
+        (RefinedBlock, List[RefinedTransactionReceipt], List[RefinedEventLog])],
+      numPartitions: Int): Unit = {
+    _processWithoutSave(blocks, numPartitions)
+      .foreachPartition(procAccount _)
   }
 }

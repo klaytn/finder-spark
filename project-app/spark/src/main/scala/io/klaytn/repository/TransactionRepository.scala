@@ -3,8 +3,10 @@ package io.klaytn.repository
 import io.klaytn.dsl.db.withDB
 import io.klaytn.model.{Chain, ChainPhase, RefinedTransactionReceipt}
 import io.klaytn.utils.JsonUtil
+import io.klaytn.utils.Utils
 import io.klaytn.utils.JsonUtil.Implicits._
 import scala.collection.mutable
+import io.klaytn.model.SignatureData
 
 object TransactionRepository {
   val TransactionDB: String = "finder0101"
@@ -163,6 +165,68 @@ abstract class TransactionRepository extends AbstractRepository {
       }
 
       result.toList
+    }
+  }
+  def getTransactionReceiptsByBlockRange(
+      startNum: Long,
+      endNum: Long): Seq[RefinedTransactionReceipt] = {
+    withDB(TransactionDB) { c =>
+      val pstmt = c.prepareStatement(
+        s"select * from $TransactionTable t where t.block_number BETWEEN ? and ?")
+
+      pstmt.setLong(1, startNum)
+      pstmt.setLong(2, endNum)
+
+      val rs = pstmt.executeQuery()
+      val result = mutable.ArrayBuffer[RefinedTransactionReceipt]()
+      while (rs.next()) {
+        result += RefinedTransactionReceipt(
+          "transaction_receipts",
+          Utils.getBlockNumberPartition(rs.getLong("block_number")),
+          JsonUtil.fromJson[List[String]](rs.getString("access_list")),
+          rs.getString("block_hash"),
+          rs.getLong("block_number"),
+          Option(rs.getString("contract_address")),
+          Option(rs.getString("chain_id")),
+          rs.getString("from"),
+          rs.getLong("gas"),
+          rs.getString("gas_price"),
+          rs.getInt("gas_used"),
+          Option(rs.getString("input")),
+          rs.getString("logs_bloom"),
+          Option(rs.getString("max_fee_per_gas")),
+          Option(rs.getString("max_priority_fee_per_gas")),
+          rs.getLong("nonce"),
+          rs.getString("sender_tx_hash"),
+          JsonUtil
+            .fromJson[List[SignatureData]](rs.getString("signatures"))
+            .getOrElse(List.empty),
+          rs.getBoolean("status"),
+          Option(rs.getString("to")),
+          rs.getString("transaction_hash"),
+          rs.getInt("transaction_index"),
+          rs.getString("type"),
+          rs.getInt("type_int"),
+          Option(rs.getString("value")),
+          Option(rs.getString("code_format")),
+          Option(rs.getString("fee_payer")),
+          JsonUtil.fromJson[List[SignatureData]](
+            rs.getString("fee_payer_signatures")),
+          Option(rs.getString("fee_ratio")),
+          Option(rs.getBoolean("human_readable")),
+          Option(rs.getString("key")),
+          Option(rs.getInt("tx_error")),
+          rs.getInt("token_transfer_count"),
+          rs.getInt("nft_transfer_count"),
+          rs.getInt("timestamp"),
+          Option(rs.getString("effective_gas_price"))
+        )
+      }
+
+      rs.close()
+      pstmt.close()
+
+      result
     }
   }
 }
