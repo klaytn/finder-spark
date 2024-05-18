@@ -1,6 +1,7 @@
 package io.klaytn.service
 
 import com.klaytn.caver.Caver
+import com.klaytn.caver.methods.request.KlayLogFilter
 import com.typesafe.config.{Config, ConfigFactory}
 import io.klaytn._
 import io.klaytn.contract.lib.KIP17MetadataReader
@@ -8,9 +9,12 @@ import io.klaytn.model._
 import io.klaytn.model.finder.{Contract, ContractType}
 import io.klaytn.utils.JsonUtil
 import io.klaytn.utils.JsonUtil.Implicits._
+import io.klaytn.utils.Utils.getBlockNumberPartition
 import io.klaytn.utils.http.HttpClient
 import org.apache.http.HttpHeaders
+import org.web3j.protocol.core.DefaultBlockParameter
 
+import java.math.BigInteger
 import scala.collection.JavaConverters._
 import scala.util.Try
 
@@ -71,6 +75,36 @@ class CaverService(caverUrl: String,
         e.printStackTrace()
         None
     }
+  }
+
+  def getEventLogsByBlock(block: RefinedBlock): List[RefinedEventLog] = {
+    val logs = caver.rpc.klay
+      .getBlockReceipts(block.hash)
+      .send()
+      .getResult()
+      .asScala
+      .map(tx => (tx, tx.getLogs().asScala))
+      .flatMap(res => {
+        val (tx, logs) = res
+        logs.map(
+          log =>
+            RefinedEventLog(
+              "event_logs",
+              getBlockNumberPartition(log.getBlockNumber.longValueExact()),
+              log.getBlockHash,
+              log.getBlockNumber.longValueExact(),
+              log.getTransactionHash,
+              log.getTransactionIndex.intValueExact(),
+              tx.getStatus == "0x1",
+              tx.getContractAddress,
+              log.getTopics.asScala.seq,
+              log.getData,
+              log.getLogIndex.intValueExact(),
+              block.timestamp,
+              Option(log.isRemoved)
+          ))
+      })
+    logs.toList
   }
 
   def getTransactionReceipts(blockHash: String): List[TransactionReceipt] = {
@@ -167,8 +201,9 @@ class CaverService(caverUrl: String,
     BlockContent(
       Option(blockByNumber.getBaseFeePerGas),
       Option(blockByNumber.getBlockScore),
-      Try { blockWithConsensusInfoByNumber.getCommittee.asScala.toList }
-        .getOrElse(List.empty),
+      Try {
+        blockWithConsensusInfoByNumber.getCommittee.asScala.toList
+      }.getOrElse(List.empty),
       blockByNumber.getExtraData,
       blockByNumber.getGasUsed,
       Option(blockByNumber.getGovernanceData),
